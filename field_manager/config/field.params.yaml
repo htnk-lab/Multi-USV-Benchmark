@@ -1,0 +1,29 @@
+/**:
+  ros__parameters:
+    world_frame: "world"
+    agent_frame: "base"
+    # agent_prefix: "agent"
+
+    kp: 1.0 # P-gain
+    dt: 0.1 # [s]
+
+    # field parameters
+    # TODO: pool size
+    grid_accuracy: [50, 50]
+    x_limit: [-1.0, 1.0]
+    y_limit: [-1.0, 1.0]
+
+agent0:
+  robot:
+    ros__parameters:
+      init_position: [0.5, 0.0]
+
+agent1:
+  robot:
+    ros__parameters:
+      init_position: [0.0, 0.5]
+
+agent2:
+  robot:
+    ros__parameters:
+      init_position: [-0.5, 0.5]
