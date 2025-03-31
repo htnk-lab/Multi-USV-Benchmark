@@ -21,7 +21,7 @@ from launch.substitutions import LaunchConfiguration
 def launch_setup(
     context: LaunchContext,
 ) -> List[Union[Node, GroupAction, LaunchDescription]]:
-    agent_num = int(LaunchConfiguration("num", default=3).perform(context))
+    agent_num = int(LaunchConfiguration("num", default=1).perform(context))
     assert agent_num in range(1, 6), f"invalid agent_num: {agent_num}"
 
     pkg_benchmark_main = get_package_share_directory("benchmark_main")
@@ -53,6 +53,11 @@ def launch_setup(
             # Node(package="field_manager", executable="phi_marker_visualizer"),
             Node(package="field_manager", executable="phi_pointcloud_visualizer"),
             Node(package="joy", executable="joy_node"),
+            Node(
+                package="field_manager",
+                executable="pool_visualizer",
+                output="screen",
+            ),
         ]
     )
 

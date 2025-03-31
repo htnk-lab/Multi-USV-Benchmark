@@ -1,8 +1,12 @@
 /**:
   ros__parameters:
     world_frame: "world"
+    pool_frame: "pool_origin"
     agent_frame: "base"
     # agent_prefix: "agent"
+
+    pool_stl_file_name: "aqua_pool.stl"
+    pool_origin_position: [0.87, 1.07, 0.2]
 
     kp: 1.0 # P-gain
     dt: 0.1 # [s]
