@@ -25,12 +25,12 @@ def launch_setup(context: LaunchContext) -> List[GroupAction]:
             SetParameter(name="agent_id", value=agent_id),
             SetParametersFromFile(field_config),
             Node(
-                package="field_manager",
-                executable="agent_body",
+                package="robot_model",
+                executable="kinematic_agent",
             ),
             Node(
-                package="field_manager",
-                executable="controller",
+                package="los_controller",
+                executable="joy_controller",
             ),
             Node(
                 package="field_manager",

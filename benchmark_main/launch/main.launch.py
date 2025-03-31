@@ -24,6 +24,7 @@ def launch_setup(
     agent_num = int(LaunchConfiguration("num", default=3).perform(context))
     assert agent_num in range(1, 6), f"invalid agent_num: {agent_num}"
 
+    pkg_benchmark_main = get_package_share_directory("benchmark_main")
     pkg_field_manager = get_package_share_directory("field_manager")
     rviz_config = os.path.join(pkg_field_manager, "rviz", "field.rviz")
     assert os.path.exists(rviz_config)
@@ -51,13 +52,14 @@ def launch_setup(
             ),
             # Node(package="field_manager", executable="phi_marker_visualizer"),
             Node(package="field_manager", executable="phi_pointcloud_visualizer"),
+            Node(package="joy", executable="joy_node"),
         ]
     )
 
     agent_launch_list = [
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
-                [os.path.join(pkg_field_manager, "launch", "agent.launch.py")]
+                [os.path.join(pkg_benchmark_main, "launch", "agent.launch.py")]
             ),
             launch_arguments={
                 "field_config": field_config,

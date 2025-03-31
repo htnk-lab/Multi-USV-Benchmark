@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>field_manager</name>
+  <name>robot_model</name>
   <version>0.0.0</version>
-  <description>Package for launching benchmark</description>
-  <maintainer email="toshiyuki67026@gmail.com">Toshiyuki Oshima</maintainer>
-  <license>Apache License2.0</license>
+  <description>Models of robots</description>
+  <maintainer email="tymtox4@gmail.com">dolphin</maintainer>
+  <license>Apache-2.0</license>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
