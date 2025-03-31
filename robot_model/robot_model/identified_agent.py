@@ -25,7 +25,6 @@ class VirtualAgent(Node):
                 ("timer_period", 0.02),
                 ("init_position", [0.5, 1.7]),
                 ("init_yaw", 0.0),
-                ("agent_frame", "base"),
                 ("init_forward_velocity", 0.26),
             ],
         )
@@ -40,9 +39,6 @@ class VirtualAgent(Node):
         self.yaw = self.get_parameter("init_yaw").get_parameter_value().double_value
         self.forward_velocity: float = self.get_parameter("init_forward_velocity").get_parameter_value().double_value
 
-        self.agent_frame = str(
-            self.get_namespace() + "/" + self.get_parameter("agent_frame").get_parameter_value().string_value
-        )
         # initialize
         self.time_past = self.get_clock().now().nanoseconds * (10 ** (-9))
         self.z = 0.08  # karugamotモデルを水上へ表示するためのオフセット

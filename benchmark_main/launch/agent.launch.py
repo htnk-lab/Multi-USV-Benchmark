@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
+import os
 
 from typing import List
+
+import xacro
+from ament_index_python.packages import get_package_share_directory
 
 from launch_ros.actions import Node, PushRosNamespace, SetParameter, SetParametersFromFile
 
@@ -18,6 +22,16 @@ def launch_setup(context: LaunchContext) -> List[GroupAction]:
     agent_id = LaunchConfiguration("agent_id").perform(context)
     agent_name = agent_prefix + agent_id
 
+    # rviz上にロボットの3Dモデルを表示するための処理
+    pkg_robot_model = get_package_share_directory("robot_model")
+    xacro_file_path = os.path.join(pkg_robot_model, "urdf", "karugamot.urdf.xacro")
+    assert os.path.exists(xacro_file_path)
+
+    # xacro:argを用いてxacroファイル変数を渡すことができる
+    # 複数台の場合はそれぞれ固有のrobot_idを付与する
+    doc = xacro.process_file(xacro_file_path, mappings={"robot_id": str(agent_id), "robot_frame": "base"})
+    robot_desc = doc.toxml()
+
     # GroupActionによりnamespaceやparameterを一括して与える
     agent_group = GroupAction(
         actions=[
@@ -25,8 +39,17 @@ def launch_setup(context: LaunchContext) -> List[GroupAction]:
             SetParameter(name="agent_id", value=agent_id),
             SetParametersFromFile(field_config),
             Node(
+                package="robot_state_publisher",
+                executable="robot_state_publisher",
+                parameters=[{"robot_description": robot_desc}],
+            ),
+            Node(
                 package="robot_model",
                 executable="kinematic_agent",
+            ),
+            Node(
+                package="robot_model",
+                executable="posest2posevel",
             ),
             Node(
                 package="los_controller",

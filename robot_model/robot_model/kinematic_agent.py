@@ -27,10 +27,7 @@ class KinematicAgent(Node):
             "world_frame", "world", descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_STRING)
         )
         self.declare_parameter(
-            "agent_frame", "base", descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_STRING)
-        )
-        self.declare_parameter(
-            "timer_period", 0.1, descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_DOUBLE)
+            "dt", 0.1, descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_DOUBLE)
         )
 
         # get parameter
@@ -48,15 +45,13 @@ class KinematicAgent(Node):
             ),
         )
         self.world_frame = str(self.get_parameter("world_frame").value)
-        self.agent_frame = str(self.get_namespace() + "/" + self.get_parameter("agent_frame").value)
-        self.dt = float(self.get_parameter("timer_period").value)
+        self.dt = float(self.get_parameter("dt").value)
 
         self.v = 0.0
         self.omega = 0.0
 
         # pub
         self.pose_pub = self.create_publisher(PoseStamped, "pose", 10)
-        self.curr_pose_pub = self.create_publisher(Pose, "curr_pose", 10)
 
         # sub
         self.create_subscription(Twist, "cmd_vel", self.cmd_vel_callback, 10)
@@ -86,20 +81,6 @@ class KinematicAgent(Node):
                     ["x", "y", "z", "w"],
                     quaternion_from_euler(ai=0.0, aj=0.0, ak=yaw + self.dt * self.omega),
                 )
-            )
-        )
-
-        curr_pose = self.curr_pose
-
-        self.curr_pose_pub.publish(curr_pose)
-        # for footprinter
-        self.pose_pub.publish(
-            PoseStamped(
-                header=Header(
-                    stamp=self.get_clock().now().to_msg(),
-                    frame_id=self.world_frame,
-                ),
-                pose=curr_pose,
             )
         )
 
