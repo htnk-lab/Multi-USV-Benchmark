@@ -1,6 +1,7 @@
 /**:
   ros__parameters:
     world_frame: "world"
+    pool_frame: "pool_origin"
     agent_frame: "base"
     # agent_prefix: "agent"
 
@@ -15,18 +16,3 @@
     grid_accuracy: [90, 34]
     x_limit: [-1.5, 3.0] # 4.5m
     y_limit: [0.2, 1.9] # 1.7m
-
-agent0:
-  robot:
-    ros__parameters:
-      init_position: [0.5, 0.0]
-
-agent1:
-  robot:
-    ros__parameters:
-      init_position: [0.0, 0.5]
-
-agent2:
-  robot:
-    ros__parameters:
-      init_position: [-0.5, 0.5]
