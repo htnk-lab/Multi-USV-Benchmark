@@ -4,14 +4,17 @@
     agent_frame: "base"
     # agent_prefix: "agent"
 
+    pool_stl_file_name: "aqua_pool.stl"
+    pool_origin_position: [0.87, 1.07, 0.2]
+
     kp: 1.0 # P-gain
     dt: 0.1 # [s]
 
     # field parameters
     # TODO: pool size
-    grid_accuracy: [50, 50]
-    x_limit: [-1.0, 1.0]
-    y_limit: [-1.0, 1.0]
+    grid_accuracy: [90, 34]
+    x_limit: [-1.5, 3.0] # 4.5m
+    y_limit: [0.2, 1.9] # 1.7m
 
 agent0:
   robot:

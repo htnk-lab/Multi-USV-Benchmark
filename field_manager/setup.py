@@ -15,6 +15,7 @@ setup(
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
         (os.path.join("share", package_name, "config"), glob("config/*.yaml")),
+        (os.path.join("share", package_name, "meshes"), glob("meshes/*.stl")),
         (os.path.join("share", package_name, "launch"), glob("launch/*.launch.py")),
         (os.path.join("share", package_name, "rviz"), glob("rviz/*.rviz")),
     ],
@@ -33,6 +34,7 @@ setup(
             "pose_collector = field_manager.pose_collector:main",
             "sensing_region_marker_visualizer = field_manager.sensing_region_marker_visualizer:main",
             "sensing_region_pointcloud_visualizer = field_manager.sensing_region_pointcloud_visualizer:main",
+            "pool_visualizer = field_manager.pool_visualizer:main",
         ],
     },
 )
