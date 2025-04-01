@@ -10,7 +10,7 @@ from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray
 
 from .coverage_utils.field_generator import FieldGenerator
-from .coverage_utils.utils import ndarray_to_multiarray, smooth_ramp
+from .coverage_utils.utils import ndarray_to_multiarray
 
 class Central(Node):
     """重要度分布を管理する集中制御器"""
