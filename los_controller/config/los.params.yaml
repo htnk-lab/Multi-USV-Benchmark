@@ -1,0 +1,6 @@
+/**:
+  ros__parameters:
+    delta_max: 0.2
+    delta_min: 0.1
+    R_switch: 0.1
+    bandwidth: 0.2
