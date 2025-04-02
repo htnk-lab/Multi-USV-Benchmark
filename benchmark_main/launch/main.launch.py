@@ -53,6 +53,7 @@ def launch_setup(
             Node(
                 package="field_manager",
                 executable="central",
+                parameters=[{"agent_num": agent_num}],
             ),
             # Node(package="field_manager", executable="phi_marker_visualizer"),
             Node(package="field_manager", executable="phi_pointcloud_visualizer"),

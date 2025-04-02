@@ -59,6 +59,10 @@ def launch_setup(context: LaunchContext) -> List[GroupAction]:
             ),
             Node(
                 package="field_manager",
+                executable="sensing_region_calculator",
+            ),
+            Node(
+                package="field_manager",
                 executable="sensing_region_marker_visualizer",
             ),
             # Node(
