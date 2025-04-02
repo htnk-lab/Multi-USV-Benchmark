@@ -12,6 +12,7 @@ setup(
     data_files=[
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
+        (os.path.join("share", package_name, "config"), glob("config/*.yaml")),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -23,6 +24,10 @@ setup(
     entry_points={
         'console_scripts': [
             "joy_controller = los_controller.joy_controller:main",
+            "angle_fbcontroller = los_controller.angle_fbcontroller:main",
+            "convex_polygon_creator = los_controller.convex_polygon_creator:main",
+            "los = los_controller.los:main",
+            "waypoints_generator = los_controller.waypoints_generator:main",
         ],
     },
 )

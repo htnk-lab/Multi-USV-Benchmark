@@ -1,23 +1,43 @@
 agent0:
   kinematic_agent:
     ros__parameters:
-      init_position: [0.5, 0.0]
+      init_position: [-0.5, 0.5]
+  ideal_agent:
+    ros__parameters:
+      init_position: [-0.5, 0.5]
   identified_agent:
     ros__parameters:
-      init_position: [0.5, 0.0]
+      init_position: [-0.5, 0.5]
 
 agent1:
   kinematic_agent:
     ros__parameters:
-      init_position: [0.0, 0.5]
+      init_position: [1.0, 1.5]
+  ideal_agent:
+    ros__parameters:
+      init_position: [1.0, 1.5]    
   identified_agent:
     ros__parameters:
-      init_position: [0.0, 0.5]
+      init_position: [1.0, 1.5]
 
 agent2:
   kinematic_agent:
     ros__parameters:
-      init_position: [-0.5, 0.5]
+      init_position: [1.5, 0.5]
+  ideal_agent:
+    ros__parameters:
+      init_position: [1.5, 0.5]
   identified_agent:
     ros__parameters:
-      init_position: [-0.5, 0.5]
+      init_position: [1.5, 0.5]
+
+agent3:
+  kinematic_agent:
+    ros__parameters:
+      init_position: [2.0, 1.0]
+  ideal_agent:
+    ros__parameters:
+      init_position: [2.0, 1.0]
+  identified_agent:
+    ros__parameters:
+      init_position: [2.0, 1.0]
