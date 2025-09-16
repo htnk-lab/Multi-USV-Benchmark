@@ -2,7 +2,7 @@
 
 from typing import Union
 
-from sympy import Matrix, Symbol, exp, lambdify, rot_ccw_axis3, symbols
+from sympy import Matrix, Symbol, exp, lambdify, symbols
 
 
 class SensingPerformance:

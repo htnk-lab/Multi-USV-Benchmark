@@ -7,21 +7,20 @@ A benchmark on multi-USV control for aquatic environmental monitoring
 - Python3.10
 
 ## Installation
-TBD
 ```sh
 mkdir ~/ros2ws/src
 cd ~/ros2_ws/src
 git clone https://github.com/htnk-lab/Multi-USV-Benchmark.git
-cd ~/ros2_ws/src/Multi-USV-Benchmark
 ```
 ```sh
+cd ~/ros2_ws/src/Multi-USV-Benchmark
 python3 -m pip install -r requirements.txt
 ```
 ```sh
-sudo apt-get install xterm
+sudo apt-get install ros-humble-xacro
 ```
 ```sh
-sudo apt-get install ros-humble-xacro
+sudo apt-get install ros-humble-tf-transformations
 ```
 
 ```sh
