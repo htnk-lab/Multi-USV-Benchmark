@@ -24,6 +24,10 @@ sudo apt-get install xterm
 sudo apt-get install ros-humble-xacro
 ```
 
+```sh
+git submodule add git@github.com:toshi67026/ros2bag2csv.git ros2bag2csv
+```
+
 ## License
 Apache License 2.0
 
