@@ -24,20 +24,21 @@ def launch_setup(
 ) -> List[Union[Node, GroupAction, LaunchDescription]]:
     agent_num = int(LaunchConfiguration("num", default=2).perform(context))
     assert agent_num in range(1, 5), f"invalid agent_num: {agent_num}"
-    bag_name = str(LaunchConfiguration("name", default="Data").perform(context))
-    assert bag_name.strip(), "Launch argument 'bag_name' must not be empty."
+    bag_name = str(LaunchConfiguration("name", default="").perform(context))
     cwd = os.getcwd()
     bag_path = os.path.join(cwd, "src/Multi-USV-Benchmark/ros2bag2csv", bag_name)
-    # すでに存在していたらエラーにする
-    assert not os.path.exists(bag_path), f"Bag path '{bag_path}' already exists. Choose a different name."
 
     pkg_benchmark_main = get_package_share_directory("benchmark_main")
     pkg_robot_model = get_package_share_directory("robot_model")
     pkg_field_manager = get_package_share_directory("field_manager")
     pkg_controller = get_package_share_directory("controller")
-
+    
+    central_config = os.path.join(pkg_field_manager, "config", "central.params.yaml")
+    robot_config = os.path.join(pkg_robot_model, "config", "robot.params.yaml")
+    controller_config = os.path.join(pkg_controller, "config", "controller.params.yaml")
     rviz_config = os.path.join(pkg_field_manager, "rviz", "field.rviz")
     assert os.path.exists(rviz_config)
+    
     visualization_node = Node(
         package="rviz2",
         executable="rviz2",
@@ -48,10 +49,6 @@ def launch_setup(
         cmd=['ros2', 'bag', 'record', '-o', bag_path, '-a'],
         output='screen'
     )
-
-    central_config = os.path.join(pkg_field_manager, "config", "central.params.yaml")
-    robot_config = os.path.join(pkg_robot_model, "config", "robot.params.yaml")
-    controller_config = os.path.join(pkg_controller, "config", "controller.params.yaml")
 
     # group actionでまとめることでconfigを共通で与える
     central_fields_nodes = GroupAction(
@@ -98,7 +95,7 @@ def launch_setup(
         for agent_id in range(agent_num)
     ]
     # nodeの起動順に起因するagentのジャンプを防ぐため，central系を後に
-    return [logging_node] + agent_launch_list + [visualization_node, central_fields_nodes]
+    return ([logging_node] if bag_name else []) + agent_launch_list + [visualization_node, central_fields_nodes]
 
 
 def generate_launch_description() -> LaunchDescription:
