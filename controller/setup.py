@@ -3,7 +3,7 @@ from glob import glob
 
 from setuptools import setup
 
-package_name = 'los_controller'
+package_name = 'controller'
 
 setup(
     name=package_name,
@@ -23,10 +23,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            "angle_fbcontroller = los_controller.angle_fbcontroller:main",
-            "convex_polygon_creator = los_controller.convex_polygon_creator:main",
-            "los = los_controller.los:main",
-            "waypoints_generator = los_controller.waypoints_generator:main",
+            "angle_fbcontroller = controller.angle_fbcontroller:main",
+            "los = controller.los:main",
+            "waypoints_generator = controller.waypoints_generator:main",
         ],
     },
 )

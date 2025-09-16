@@ -27,7 +27,7 @@ def launch_setup(
     pkg_benchmark_main = get_package_share_directory("benchmark_main")
     pkg_robot_model = get_package_share_directory("robot_model")
     pkg_field_manager = get_package_share_directory("field_manager")
-    pkg_los_controller = get_package_share_directory("los_controller")
+    pkg_controller = get_package_share_directory("controller")
 
     rviz_config = os.path.join(pkg_field_manager, "rviz", "field.rviz")
     assert os.path.exists(rviz_config)
@@ -39,14 +39,14 @@ def launch_setup(
 
     field_config = os.path.join(pkg_field_manager, "config", "field.params.yaml")
     robot_config = os.path.join(pkg_robot_model, "config", "robot.params.yaml")
-    los_config = os.path.join(pkg_los_controller, "config", "los.params.yaml")
+    controller_config = os.path.join(pkg_controller, "config", "controller.params.yaml")
 
     # group actionでまとめることでconfigを共通で与える
     central_group = GroupAction(
         actions=[
             SetParametersFromFile(field_config),
             SetParametersFromFile(robot_config),
-            SetParametersFromFile(los_config),
+            SetParametersFromFile(controller_config),
             SetParameter(name="agent_num", value=agent_num),
             Node(
                 package="field_manager",
@@ -55,11 +55,11 @@ def launch_setup(
             ),
             Node(
                 package="field_manager",
-                executable="central",
+                executable="phi_update",
             ),
             Node(package="field_manager", executable="phi_pointcloud_visualizer"),
             Node(
-                package="los_controller",
+                package="field_manager",
                 executable="convex_polygon_creator",
             ),
             Node(
@@ -78,7 +78,7 @@ def launch_setup(
             launch_arguments={
                 "field_config": field_config,
                 "robot_config": robot_config,
-                "los_config": los_config,
+                "controller_config": controller_config,
                 "agent_id": str(agent_id),
                 "agent_num": str(agent_num),
             }.items(),

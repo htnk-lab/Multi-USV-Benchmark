@@ -26,11 +26,11 @@ class Data:
     sensing_region: NDArray
     is_ready: bool = False
 
-class Central(Node):
+class PhiUpdate(Node):
     """Centralized controller to manage importance distribution"""
 
     def __init__(self) -> None:
-        super().__init__("central")
+        super().__init__("phi_update")
 
         # declare parameter
         self.declare_parameter(
@@ -125,7 +125,7 @@ class Central(Node):
             if (
                 len([data.is_ready for data in self.data_list if not data.is_ready]) == 0
             ) and self.pose_array_is_ready:
-                self.get_logger().warn("central is ready")
+                self.get_logger().warn("phi_update is ready")
                 self.central_is_ready = True
 
         self.phi_pub.publish(ndarray_to_multiarray(Float32MultiArray, self.phi))
@@ -154,14 +154,14 @@ class Central(Node):
 
 def main() -> None:
     rclpy.init()
-    central = Central()
+    phi_update = PhiUpdate()
 
     try:
-        rclpy.spin(central)
+        rclpy.spin(phi_update)
     except:
-        central.get_logger().error(traceback.format_exc())
+        phi_update.get_logger().error(traceback.format_exc())
     finally:
-        central.destroy_node()
+        phi_update.destroy_node()
         rclpy.shutdown()
 
 

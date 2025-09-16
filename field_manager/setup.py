@@ -28,7 +28,8 @@ setup(
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
-            "central = field_manager.central:main",
+            "phi_update = field_manager.phi_update:main",
+            "convex_polygon_creator = field_manager.convex_polygon_creator:main",
             "phi_pointcloud_visualizer = field_manager.phi_pointcloud_visualizer:main",
             "pose_collector = field_manager.pose_collector:main",
             "sensing_region_calculator = field_manager.sensing_region_calculator:main",
