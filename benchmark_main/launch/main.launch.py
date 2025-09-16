@@ -12,6 +12,7 @@ from launch.actions import (
     GroupAction,
     IncludeLaunchDescription,
     OpaqueFunction,
+    ExecuteProcess,
 )
 from launch.launch_context import LaunchContext
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -23,7 +24,8 @@ def launch_setup(
 ) -> List[Union[Node, GroupAction, LaunchDescription]]:
     agent_num = int(LaunchConfiguration("num", default=2).perform(context))
     assert agent_num in range(1, 5), f"invalid agent_num: {agent_num}"
-
+    bag_name = str(LaunchConfiguration("name", default="Data").perform(context))
+    assert bag_name.strip(), "Launch argument 'bag_name' must not be empty."
     pkg_benchmark_main = get_package_share_directory("benchmark_main")
     pkg_robot_model = get_package_share_directory("robot_model")
     pkg_field_manager = get_package_share_directory("field_manager")
@@ -35,6 +37,11 @@ def launch_setup(
         package="rviz2",
         executable="rviz2",
         arguments=["-d", rviz_config],
+    )
+
+    logging_node = ExecuteProcess(
+        cmd=['ros2', 'bag', 'record', '-o', bag_name, '-a'],
+        output='screen'
     )
 
     central_config = os.path.join(pkg_field_manager, "config", "central.params.yaml")
@@ -86,11 +93,12 @@ def launch_setup(
         for agent_id in range(agent_num)
     ]
     # nodeの起動順に起因するagentのジャンプを防ぐため，central系を後に
-    return agent_launch_list + [visualization_node, central_fields_nodes]
+    return [logging_node] + agent_launch_list + [visualization_node, central_fields_nodes]
 
 
 def generate_launch_description() -> LaunchDescription:
-    DeclareLaunchArgument("num", description="< 5")
+    DeclareLaunchArgument("num", description="Number of agents")
+    DeclareLaunchArgument("name", description="Name of the output rosbag")
 
     # Create the launch description and populate
     ld = LaunchDescription()

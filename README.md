@@ -46,12 +46,13 @@ source ~/ros2_ws/install/local_setup.bash
 ### 2. Launch the program
 Run the following command to start the program:
 ```sh
-ros2 launch benchmark_main main.launch.py num:=2
+ros2 launch benchmark_main main.launch.py num:=2 name:=Data0
 ```
 - ### Parameters
 | Name  | Description               | Type        | Default | Min | Max | Note                |
 |-------|---------------------------|-------------|---------|-----|-----|---------------------|
-| `num` | Number of agents          | Natural int | 2       | 1   | 5   | Must be a natural number (≥1) |
+| `num` | Number of agents          | Natural int | 2       | 1   | 4   | Must be a natural number (≥1) |
+| `name` | Name of the output rosbag          | String | Data       | -   | -   | Must not be empty |
 
 
 ## Maintainer
