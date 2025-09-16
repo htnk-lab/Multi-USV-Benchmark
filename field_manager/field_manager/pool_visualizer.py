@@ -32,10 +32,6 @@ class PoolVisualizer(Node):
             "dt", 0.1, descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_STRING)
         )
 
-        self.declare_parameter(
-            "pool_origin_position", [0.0, 0.0, 0.0], descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_DOUBLE_ARRAY)
-        )
-
         # get parameter
         world_frame = str(self.get_parameter("world_frame").value)
         pool_frame = str(self.get_parameter("pool_frame").value)
@@ -43,7 +39,7 @@ class PoolVisualizer(Node):
         timer_period = float(self.get_parameter("dt").value)
 
         # center of the top surface of the pool(=origin of the pool model) in world coordinate(origin within motive)
-        pool_origin_position_in_world = Vector3(**dict(zip(["x", "y", "z"], self.get_parameter("pool_origin_position").value)))
+        pool_origin_position_in_world = Vector3(**dict(zip(["x", "y", "z"], [0.87, 1.07, 0.2])))
 
         world_to_pool_origin = TransformStamped(
             header=Header(stamp=self.get_clock().now().to_msg(), frame_id=world_frame),
