@@ -57,9 +57,7 @@ def launch_setup(
                 package="field_manager",
                 executable="central",
             ),
-            # Node(package="field_manager", executable="phi_marker_visualizer"),
             Node(package="field_manager", executable="phi_pointcloud_visualizer"),
-            Node(package="joy", executable="joy_node"),
             Node(
                 package="los_controller",
                 executable="convex_polygon_creator",

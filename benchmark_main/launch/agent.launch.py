@@ -59,10 +59,6 @@ def launch_setup(context: LaunchContext) -> List[GroupAction]:
             ),
             Node(
                 package="los_controller",
-                executable="joy_controller",
-            ),
-            Node(
-                package="los_controller",
                 executable="waypoints_generator",
             ),
             Node(
@@ -85,10 +81,6 @@ def launch_setup(context: LaunchContext) -> List[GroupAction]:
                 package="robot_model",
                 executable="footprinter",
             )
-            # Node(
-            #     package="field_manager",
-            #     executable="sensing_region_pointcloud_visualizer",
-            # ),
         ],
     )
     return [agent_group]
