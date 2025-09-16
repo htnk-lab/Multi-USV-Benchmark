@@ -8,9 +8,47 @@ A benchmark on multi-USV control for aquatic environmental monitoring
 
 ## Installation
 TBD
+```sh
+mkdir ~/ros2ws/src
+cd ~/ros2_ws/src
+git clone https://github.com/htnk-lab/Multi-USV-Benchmark.git
+cd ~/ros2_ws/src/Multi-USV-Benchmark
+```
+```sh
+python3 -m pip install -r requirements.txt
+```
+```sh
+sudo apt-get install xterm
+```
+```sh
+sudo apt-get install ros-humble-xacro
+```
 
 ## License
 Apache License 2.0
+
+## Usage
+
+### 1. Build the workspace and source the environment
+
+Run the following commands to build the packages and set up the environment:
+
+```sh
+cd ~/ros2_ws
+colcon build
+source ~/ros2_ws/install/local_setup.bash
+```
+
+### 2. Launch the program
+Run the following command to start the program:
+```sh
+ros2 launch benchmark_main main.launch.py num:=2
+```
+- ### Parameters
+| Name  | Description               | Type        | Default | Min | Max | Note                |
+|-------|---------------------------|-------------|---------|-----|-----|---------------------|
+| `num` | Number of agents          | Natural int | 2       | 1   | 5   | Must be a natural number (≥1) |
+
 
 ## Maintainer
 - [Toshiyuki Oshima](https://github.com/toshi67026)
