@@ -26,7 +26,6 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            "kinematic_agent = robot_model.kinematic_agent:main",
             "ideal_agent = robot_model.ideal_agent:main",
             "footprinter = robot_model.footprinter:main",
             "posest2posevel = robot_model.posest2posevel:main",
