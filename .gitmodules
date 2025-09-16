@@ -1,3 +1,0 @@
-[submodule "ros2bag2csv"]
-	path = ros2bag2csv
-	url = git@github.com:toshi67026/ros2bag2csv.git

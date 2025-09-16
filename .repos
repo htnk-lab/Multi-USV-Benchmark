@@ -1,0 +1,5 @@
+repositories:
+  ros2bag2csv:
+    type: git
+    url: git@github.com:toshi67026/ros2bag2csv.git
+    version: main

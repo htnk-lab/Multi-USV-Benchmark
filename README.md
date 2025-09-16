@@ -24,7 +24,7 @@ sudo apt-get install ros-humble-tf-transformations
 ```
 
 ```sh
-git submodule update --init --recursive
+vcs import < .repos
 ```
 
 ## License
