@@ -51,9 +51,19 @@ ros2 launch benchmark_main main.launch.py num:=2 name:=Data0
 - ### Parameters
 | Name  | Description               | Type        | Default | Min | Max | Note                |
 |-------|---------------------------|-------------|---------|-----|-----|---------------------|
-| `num` | Number of agents          | Natural int | 2       | 1   | 4   | Must be a natural number (≥1) |
-| `name` | Name of the output rosbag          | String | Data       | -   | -   | Must not be empty |
+| `num` | Number of agents          | Natural int | 2       | 1   | 4   | Must be a natural number (≥1).|
+| `name` | Name of the output rosbag          | String | Data       | -   | -   | Must not be empty. Must not match the name of any existing file in the save path. |
 
 
+To stop the simulation, press `Ctrl + C`.
+
+### 3.  Extract data from the recorded rosbag
+After the simulation is finished, you can extract the required　data from the generated bag file(.db3) and convert it into CSV format using `ros2bag2csv.py`. To use it, first navigate to the `ros2bag2csv` directory:
+
+```sh
+cd src/Multi-USV-Benchmark/ros2bag2csv
+```
+Instructions for how to run ros2bagcsv.py are provided in the README of the following repository:
+https://github.com/toshi67026/ros2bag2csv/tree/757a36f1401ddc039c3a5b88b6476155cf678b85
 ## Maintainer
 - [Toshiyuki Oshima](https://github.com/toshi67026)
