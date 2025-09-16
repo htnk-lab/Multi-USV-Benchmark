@@ -29,7 +29,9 @@ class IdealAgent(Node):
         self.declare_parameter(
             "dt", 0.1, descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_DOUBLE)
         )
-
+        self.declare_parameter(
+            "r_min", 0.2, descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_DOUBLE),
+        )
         # get parameter
         # curr_pose初期化
         # parameterのinit_positionの要素数が足りない場合，対応するPointの要素は0.0で初期化される
@@ -46,6 +48,7 @@ class IdealAgent(Node):
         )
         self.world_frame = str(self.get_parameter("world_frame").value)
         self.dt = float(self.get_parameter("dt").value)
+        self.r_min = float(self.get_parameter("r_min").value)
 
         self.v = 0.0
         self.omega = 0.0
@@ -76,6 +79,9 @@ class IdealAgent(Node):
             y=position.y + self.dt * np.sin(yaw) * self.v,
             z=self.z,
         )
+
+        self.max_omega = self.v/self.r_min
+        self.omega = np.clip(self.omega, -self.max_omega, self.max_omega)
 
         self.curr_pose.orientation = Quaternion(
             **dict(
