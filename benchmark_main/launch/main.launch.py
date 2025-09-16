@@ -31,20 +31,20 @@ def launch_setup(
 
     rviz_config = os.path.join(pkg_field_manager, "rviz", "field.rviz")
     assert os.path.exists(rviz_config)
-    rviz_node = Node(
+    visualization_node = Node(
         package="rviz2",
         executable="rviz2",
         arguments=["-d", rviz_config],
     )
 
-    field_config = os.path.join(pkg_field_manager, "config", "field.params.yaml")
+    central_config = os.path.join(pkg_field_manager, "config", "central.params.yaml")
     robot_config = os.path.join(pkg_robot_model, "config", "robot.params.yaml")
     controller_config = os.path.join(pkg_controller, "config", "controller.params.yaml")
 
     # group actionでまとめることでconfigを共通で与える
-    central_group = GroupAction(
+    central_fields_nodes = GroupAction(
         actions=[
-            SetParametersFromFile(field_config),
+            SetParametersFromFile(central_config),
             SetParametersFromFile(robot_config),
             SetParametersFromFile(controller_config),
             SetParameter(name="agent_num", value=agent_num),
@@ -76,7 +76,7 @@ def launch_setup(
                 [os.path.join(pkg_benchmark_main, "launch", "agent.launch.py")]
             ),
             launch_arguments={
-                "field_config": field_config,
+                "central_config": central_config,
                 "robot_config": robot_config,
                 "controller_config": controller_config,
                 "agent_id": str(agent_id),
@@ -86,7 +86,7 @@ def launch_setup(
         for agent_id in range(agent_num)
     ]
     # nodeの起動順に起因するagentのジャンプを防ぐため，central系を後に
-    return agent_launch_list + [rviz_node, central_group]
+    return agent_launch_list + [visualization_node, central_fields_nodes]
 
 
 def generate_launch_description() -> LaunchDescription:
