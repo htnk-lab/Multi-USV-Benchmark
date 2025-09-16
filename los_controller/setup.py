@@ -23,7 +23,6 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            "joy_controller = los_controller.joy_controller:main",
             "angle_fbcontroller = los_controller.angle_fbcontroller:main",
             "convex_polygon_creator = los_controller.convex_polygon_creator:main",
             "los = los_controller.los:main",
