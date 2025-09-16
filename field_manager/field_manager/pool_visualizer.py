@@ -25,7 +25,7 @@ class PoolVisualizer(Node):
             "pool_frame", "pool_origin", descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_STRING)
         )
         self.declare_parameter(
-            "pool_stl_file_name", "aqua_pool.stl", descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_STRING)
+            "pool_stl_file_name", "field.stl", descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_STRING)
         )
 
         self.declare_parameter(
