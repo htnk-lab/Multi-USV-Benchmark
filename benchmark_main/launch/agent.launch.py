@@ -17,7 +17,7 @@ from launch.substitutions import LaunchConfiguration
 def launch_setup(context: LaunchContext) -> List[GroupAction]:
     field_config = LaunchConfiguration("field_config")
     robot_config = LaunchConfiguration("robot_config")
-    los_config = LaunchConfiguration("los_config")
+    controller_config = LaunchConfiguration("controller_config")
 
     # LaunchConfigurationの中身を取得
     agent_prefix = LaunchConfiguration("agent_prefix", default="agent").perform(context)
@@ -43,7 +43,7 @@ def launch_setup(context: LaunchContext) -> List[GroupAction]:
             SetParameter(name="agent_num", value=agent_num),
             SetParametersFromFile(field_config),
             SetParametersFromFile(robot_config),
-            SetParametersFromFile(los_config),
+            SetParametersFromFile(controller_config),
             Node(
                 package="robot_state_publisher",
                 executable="robot_state_publisher",
@@ -58,15 +58,15 @@ def launch_setup(context: LaunchContext) -> List[GroupAction]:
                 executable="posest2posevel",
             ),
             Node(
-                package="los_controller",
+                package="controller",
                 executable="waypoints_generator",
             ),
             Node(
-                package="los_controller",
+                package="controller",
                 executable="los",
             ),
             Node(
-                package="los_controller",
+                package="controller",
                 executable="angle_fbcontroller",
             ),
             Node(
