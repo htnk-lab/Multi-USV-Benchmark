@@ -25,7 +25,7 @@ sudo apt-get install ros-humble-xacro
 ```
 
 ```sh
-git submodule add git@github.com:toshi67026/ros2bag2csv.git ros2bag2csv
+git submodule update --init --recursive
 ```
 
 ## License
