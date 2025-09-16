@@ -19,13 +19,13 @@ class AngFBController(Node):
 
         # declare parameter
         self.declare_parameter(
-            "dt", 0.1, descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_DOUBLE)
+            "K", 5.0, descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_DOUBLE)
         )
         self.declare_parameter(
             "init_forward_velocity", 0.26, descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_DOUBLE)
         )
         
-        self.dt = float(self.get_parameter("dt").value)
+        self.K = float(self.get_parameter("K").value)
         self.forward_vel = float(self.get_parameter("init_forward_velocity").value)
 
         # initialization
@@ -50,8 +50,13 @@ class AngFBController(Node):
 
         # allocate velocity
         if self.ref_phi_is_ready:
-            ref_angvel = 1/self.dt * (self.ref_phi - yaw)
+            err_phi = self.ref_phi - yaw
+            if err_phi > np.pi:
+                err_phi = err_phi - 2 * np.pi
+            elif err_phi < -np.pi:
+                err_phi = err_phi + 2 * np.pi
 
+            ref_angvel = self.K * err_phi  # proportional controller
             # publish calculated velocity
             cmd_vel = Twist()
             cmd_vel.angular.z = ref_angvel
@@ -61,7 +66,6 @@ class AngFBController(Node):
     def ref_phi_callback(self, msg: Float32):
         self.ref_phi = msg.data  # ref_phi is a target angle (chi_d) in LOS algorithm (in the book)
         self.ref_phi_is_ready = True
-
 
 def main() -> None:
     rclpy.init()
