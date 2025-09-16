@@ -15,7 +15,7 @@ from launch.substitutions import LaunchConfiguration
 
 
 def launch_setup(context: LaunchContext) -> List[GroupAction]:
-    field_config = LaunchConfiguration("field_config")
+    central_config = LaunchConfiguration("central_config")
     robot_config = LaunchConfiguration("robot_config")
     controller_config = LaunchConfiguration("controller_config")
 
@@ -36,14 +36,30 @@ def launch_setup(context: LaunchContext) -> List[GroupAction]:
     robot_desc = doc.toxml()
 
     # GroupActionによりnamespaceやparameterを一括して与える
-    agent_group = GroupAction(
+    central_agent_nodes = GroupAction(
         actions=[
             PushRosNamespace(agent_name),
             SetParameter(name="agent_id", value=agent_id),
             SetParameter(name="agent_num", value=agent_num),
-            SetParametersFromFile(field_config),
+            SetParametersFromFile(central_config),
+            Node(
+                package="field_manager",
+                executable="sensing_region_calculator",
+            ),
+            Node(
+                package="field_manager",
+                executable="sensing_region_marker_visualizer",
+            ),
+        ]
+    )
+
+    robot_nodes = GroupAction(
+        actions=[
+            PushRosNamespace(agent_name),
+            SetParameter(name="agent_id", value=agent_id),
+            SetParameter(name="agent_num", value=agent_num),
+            SetParametersFromFile(central_config),
             SetParametersFromFile(robot_config),
-            SetParametersFromFile(controller_config),
             Node(
                 package="robot_state_publisher",
                 executable="robot_state_publisher",
@@ -58,6 +74,20 @@ def launch_setup(context: LaunchContext) -> List[GroupAction]:
                 executable="posest2posevel",
             ),
             Node(
+                package="robot_model",
+                executable="footprinter",
+            ),
+        ]
+    )
+
+    controller_nodes = GroupAction(
+        actions=[
+            PushRosNamespace(agent_name),
+            SetParameter(name="agent_id", value=agent_id),
+            SetParameter(name="agent_num", value=agent_num),
+            SetParametersFromFile(central_config),
+            SetParametersFromFile(controller_config),
+            Node(
                 package="controller",
                 executable="waypoints_generator",
             ),
@@ -69,25 +99,13 @@ def launch_setup(context: LaunchContext) -> List[GroupAction]:
                 package="controller",
                 executable="angle_fbcontroller",
             ),
-            Node(
-                package="field_manager",
-                executable="sensing_region_calculator",
-            ),
-            Node(
-                package="field_manager",
-                executable="sensing_region_marker_visualizer",
-            ),
-            Node(
-                package="robot_model",
-                executable="footprinter",
-            )
         ],
     )
-    return [agent_group]
+    return [central_agent_nodes, robot_nodes, controller_nodes]
 
 
 def generate_launch_description() -> LaunchDescription:
-    DeclareLaunchArgument("field_config")
+    DeclareLaunchArgument("central_config")
     DeclareLaunchArgument("agent_prefix")
     DeclareLaunchArgument("agent_id")
 
