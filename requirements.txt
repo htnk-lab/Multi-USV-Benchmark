@@ -10,4 +10,8 @@ sympy
 numpy
 scipy
 matplotlib
+pandas
+rosbags
+pyyaml
+rich
 git+https://github.com/rdesc/pydubins.git
