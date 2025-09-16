@@ -26,6 +26,11 @@ def launch_setup(
     assert agent_num in range(1, 5), f"invalid agent_num: {agent_num}"
     bag_name = str(LaunchConfiguration("name", default="Data").perform(context))
     assert bag_name.strip(), "Launch argument 'bag_name' must not be empty."
+    cwd = os.getcwd()
+    bag_path = os.path.join(cwd, "src/Multi-USV-Benchmark/ros2bag2csv", bag_name)
+    # すでに存在していたらエラーにする
+    assert not os.path.exists(bag_path), f"Bag path '{bag_path}' already exists. Choose a different name."
+
     pkg_benchmark_main = get_package_share_directory("benchmark_main")
     pkg_robot_model = get_package_share_directory("robot_model")
     pkg_field_manager = get_package_share_directory("field_manager")
@@ -40,7 +45,7 @@ def launch_setup(
     )
 
     logging_node = ExecuteProcess(
-        cmd=['ros2', 'bag', 'record', '-o', bag_name, '-a'],
+        cmd=['ros2', 'bag', 'record', '-o', bag_path, '-a'],
         output='screen'
     )
 
