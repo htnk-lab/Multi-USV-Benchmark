@@ -20,13 +20,11 @@ class LOS(Node):
         self.declare_parameters(
             namespace="",
             parameters=[
-                ("delta_max", 0.8),
-                ("delta_min", 0.2),
+                ("delta", 0.2),
                 ("agent_id", 0),
             ],
         )
-        self.delta_max: float = self.get_parameter("delta_max").get_parameter_value().double_value
-        self.delta_min: float = self.get_parameter("delta_min").get_parameter_value().double_value
+        self.delta: float = self.get_parameter("delta").get_parameter_value().double_value
         self.agent_id: int = self.get_parameter("agent_id").get_parameter_value().integer_value
 
         # initialization
@@ -78,7 +76,7 @@ class LOS(Node):
                 ]
             )
         ) @ np.matrix([[self.x_position - nav_from.x], [self.y_position - nav_from.y]])
-        delta = (self.delta_max - self.delta_min) * np.exp(-2 * abs(perp[1, 0])) + self.delta_min
+        delta = self.delta
         los_position = (delta + perp[0, 0]) * (nav_vec / np.linalg.norm(nav_vec)) + np.matrix(
             [[nav_from.x], [nav_from.y]]
         )
