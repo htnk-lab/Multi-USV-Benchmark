@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<robot name="karugamot"
+<robot name="robot"
   xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="$(find robot_model)/urdf/common_properties.xacro"/>
 
@@ -12,7 +12,7 @@
     <visual>
       <origin xyz="0 0 -0.1" rpy="0 0 ${pi/2}"/>
       <geometry>
-        <mesh filename="package://robot_model/meshes/karugamot.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://robot_model/meshes/robot.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="light_grey"/>
     </visual>
@@ -20,7 +20,7 @@
     <collision>
       <origin xyz="0 0 -0.1" rpy="0 0 ${pi/2}"/>
       <geometry>
-        <mesh filename="package://robot_model/meshes/karugamot.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://robot_model/meshes/robot.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>

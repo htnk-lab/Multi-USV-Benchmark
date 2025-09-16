@@ -27,7 +27,7 @@ def launch_setup(context: LaunchContext) -> List[GroupAction]:
 
     # rviz上にロボットの3Dモデルを表示するための処理
     pkg_robot_model = get_package_share_directory("robot_model")
-    xacro_file_path = os.path.join(pkg_robot_model, "urdf", "karugamot.urdf.xacro")
+    xacro_file_path = os.path.join(pkg_robot_model, "urdf", "robot.urdf.xacro")
     assert os.path.exists(xacro_file_path)
 
     # xacro:argを用いてxacroファイル変数を渡すことができる

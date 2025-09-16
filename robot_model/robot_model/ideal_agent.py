@@ -49,7 +49,7 @@ class IdealAgent(Node):
 
         self.v = 0.0
         self.omega = 0.0
-        self.z = 0.08  # karugamotモデルを水上へ表示するためのオフセット
+        self.z = 0.08  # robotモデルを水上へ表示するためのオフセット
 
         # pub
         self.pose_pub = self.create_publisher(PoseStamped, "pose", 10)
