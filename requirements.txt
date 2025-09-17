@@ -7,7 +7,7 @@ transforms3d
 # mypy
 
 sympy
-numpy
+numpy==1.26.4
 scipy
 matplotlib
 pandas
