@@ -8,7 +8,7 @@ A benchmark on multi-USV control for aquatic environmental monitoring
 
 ## Installation
 ```sh
-mkdir ~/ros2ws/src
+mkdir ~/ros2_ws/src
 cd ~/ros2_ws/src
 git clone https://github.com/htnk-lab/Multi-USV-Benchmark.git
 ```
