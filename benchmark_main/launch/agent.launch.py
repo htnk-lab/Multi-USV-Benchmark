@@ -19,23 +19,23 @@ def launch_setup(context: LaunchContext) -> List[GroupAction]:
     robot_config = LaunchConfiguration("robot_config")
     controller_config = LaunchConfiguration("controller_config")
 
-    # LaunchConfigurationの中身を取得
+    # Get the contents of LaunchConfiguration
     agent_prefix = LaunchConfiguration("agent_prefix", default="agent").perform(context)
     agent_id = LaunchConfiguration("agent_id").perform(context)
     agent_num = LaunchConfiguration("agent_num").perform(context)
     agent_name = agent_prefix + agent_id
 
-    # rviz上にロボットの3Dモデルを表示するための処理
+    # Display the robot's 3D model in rviz
     pkg_robot_model = get_package_share_directory("robot_model")
     xacro_file_path = os.path.join(pkg_robot_model, "urdf", "robot.urdf.xacro")
     assert os.path.exists(xacro_file_path)
 
-    # xacro:argを用いてxacroファイル変数を渡すことができる
-    # 複数台の場合はそれぞれ固有のrobot_idを付与する
+    # You can pass xacro file variables using xacro:arg
+    # For multiple robots, assign a unique robot_id to each
     doc = xacro.process_file(xacro_file_path, mappings={"robot_id": str(agent_id), "robot_frame": "base"})
     robot_desc = doc.toxml()
 
-    # GroupActionによりnamespaceやparameterを一括して与える
+    # Use GroupAction to collectively set namespace and parameters
     central_agent_nodes = GroupAction(
         actions=[
             PushRosNamespace(agent_name),
@@ -112,7 +112,7 @@ def generate_launch_description() -> LaunchDescription:
     # Create the launch description and populate
     ld = LaunchDescription()
 
-    # LaunchConfigurationの値を取得するため，OpaqueFunctionで外部実行
+    # To get the value of LaunchConfiguration, execute externally with OpaqueFunction
     # ref: https://answers.ros.org/question/340705/access-launch-argument-in-launchfile-ros2/
     ld.add_action(OpaqueFunction(function=launch_setup))
 
