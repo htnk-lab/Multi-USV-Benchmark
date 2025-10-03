@@ -16,10 +16,10 @@ from .coverage_utils.utils import multiarray_to_ndarray
 
 
 class PhiPointCloudVisualizer(Node):
-    """PointCloud2を用いて重要度分布を可視化
+    """Visualize importance indices using PointCloud2
 
     Note:
-        grid_mapは以下の並びとなるよう，reshapeと転置により整形
+        grid_map is arranged by reshaping and transposing as follows:
         self.rows = [
             [x1, y1, ...],
             [x2, y2, ...]
@@ -59,7 +59,7 @@ class PhiPointCloudVisualizer(Node):
         grid_map = field_generator.generate_grid_map()
         self.rows: NDArray = np.array(grid_map).reshape([self.dim, -1]).T
 
-        # 重要度分布描画用のpointcloudを作成
+        # Create pointcloud for visualizing importance indices
         self.phi_pointcloud = PointCloud2(
             header=Header(
                 stamp=self.get_clock().now().to_msg(),
@@ -86,10 +86,10 @@ class PhiPointCloudVisualizer(Node):
         self.create_subscription(Float32MultiArray, "phi", self.phi_callback, 10)
 
     def phi_callback(self, msg: Float32MultiArray) -> None:
-        """Float32Multiarrayからpointcloudを生成してpublish
+        """Generate pointcloud from Float32Multiarray and publish it
 
         Args:
-            msg (Float32MultiArray): 重要度分布
+            msg (Float32MultiArray): Importance indices
 
         Note:
             points = [
@@ -98,14 +98,14 @@ class PhiPointCloudVisualizer(Node):
                     :
             [xn, yn, zn, rn, gn, bn]]
 
-            pointsのz座標等にphiを反映することで，座標でも重要度を表現可能
+            By reflecting phi in the z coordinate or else, importance can be visualized by the coordinates
         """
         phi = multiarray_to_ndarray(float, np.float32, msg).reshape([-1, 1])
 
-        # 次元を調整しつつmatplotlibのcolor_mapを利用して，重要度を色で表現
+        # Adjust dimensions and use matplotlib's color_map to represent importance by color
         rgba_phi: NDArray = plt.get_cmap("jet")(phi).squeeze()
 
-        # 2次元以下の場合は足りない座標分を0埋め
+        # If the dimension is less than or equal to 2, fill the missing coordinates with 0
         points = np.hstack(
             [
                 self.rows,

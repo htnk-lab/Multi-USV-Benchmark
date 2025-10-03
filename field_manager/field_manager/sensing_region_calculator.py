@@ -40,7 +40,7 @@ class SensingRegionCalculator(Node):
         # get parameter
         self.agent_id = int(self.get_parameter("agent_id").value)
 
-        # fieldを規定するパラメータを取得
+        # get parameters defining the field
         grid_accuracy = np.array(self.get_parameter("grid_accuracy").value)
         limit = np.array(
             [
@@ -52,7 +52,7 @@ class SensingRegionCalculator(Node):
 
         field_generator = FieldGenerator(grid_accuracy=grid_accuracy, limit=limit)
 
-        # 重要度分布初期化
+        # initialize importance indices
         self.phi = field_generator.generate_phi()
         self.grid_map = field_generator.generate_grid_map()
         self.point_density = np.prod(field_generator.grid_span)
@@ -69,35 +69,35 @@ class SensingRegionCalculator(Node):
 
 
     def curr_pose_array_callback(self, msg: PoseArray) -> None:
-        """近隣エージェントの位置姿勢から自身のセンシング領域(ボロノイ領域)とその重心を計算して目標座標へ反映"""
+        """Calculate sensing region (Voronoi region) and its centroid from neighboring agents' poses"""
 
-        # 近隣エージェントの位置を用いてセンシング領域を計算
+        # Calculate sensing region using neighboring agents' positions
         centroid_position, sensing_region_grid_points, sensing_region = self.calc_voronoi_tesselation(msg.poses)
 
-        # 各次元に対応して使わない要素を0で埋めた上で，unpackしたもの目標座標とする
+        # Set reference pose by filling unused dimensions with 0 and unpacking
         self.ref_pose = Pose(position=Point(**dict(zip(["x", "y", "z"], padding(centroid_position)))))
 
-        # センシング領域をpublish
+        # Publish sensing region
         self.sensing_region_pub.publish(ndarray_to_multiarray(Int8MultiArray, sensing_region))
 
     def calc_voronoi_tesselation(self, pose_list: List[Pose]) -> Tuple[NDArray, List[NDArray], NDArray]:
         all_agent_position_list: List[NDArray] = []
 
-        # Pose型のリストから各エージェント位置を抜き出してNDArray形式のリストへ変換，格納
+        # Transform list of Pose objects into a list of NDArray objects containing agent positions
         for pose in pose_list:
             all_agent_position_list.append(np.array([pose.position.x, pose.position.y, pose.position.z]))
 
         agent_position = all_agent_position_list[self.agent_id]
 
-        # 自分の位置のみ除外
+        # Exclude own position
         neighbor_agent_position_list = [
             neighbor_agent_position
             for agent_id, neighbor_agent_position in enumerate(all_agent_position_list)
             if agent_id != self.agent_id
         ]
 
-        # センシング領域を計算
-        # 円形センサーモデル使用時は，性能関数としてK.Sugimoto et al. 2015のh_{1}を採用した場合の最適解に相当
+        # Calculate sensing region
+        # When using a circular sensor model, this corresponds to the optimal solution when adopting h_{1} as the performance function according to K.Sugimoto et al. 2015
         centroid_position, sensing_region_grid_points, sensing_region = self.voronoi.calc_tesselation(
             agent_position=agent_position,
             neighbor_agent_position_list=neighbor_agent_position_list,

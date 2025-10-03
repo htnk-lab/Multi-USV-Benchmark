@@ -55,7 +55,7 @@ class PoseST2PoseVel(Node):
         self.curr_vel_pub = self.create_publisher(Twist, "curr_vel", 10)
 
         # sub
-        # topic名"pose"はmotive由来
+        # Note: it is subscribing to the topic "pose" which is derived from the Motive
         self.create_subscription(PoseStamped, "pose", self.curr_posest_callback, 10)
 
     def curr_posest_callback(self, msg: PoseStamped) -> None:
@@ -98,7 +98,7 @@ class PoseST2PoseVel(Node):
         self.prev_vry = curr_vry
         self.prev_omega = curr_omega
 
-        # 描画用に現在位置/姿勢をtf形式で送信
+        # Send current position/orientation in tf format for visualization
         transform_stamped = TransformStamped(
             header=Header(stamp=self.get_clock().now().to_msg(), frame_id=self.world_frame),
             child_frame_id=self.agent_frame,

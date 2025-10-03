@@ -9,21 +9,21 @@ from numpy.typing import NDArray
 
 @dataclass
 class Voronoi:
-    """ボロノイ領域を管理
+    """Manage Voronoi regions
 
     Attributes:
         p (float): p-norm
-        radius (float): r-limited voronoi計算における半径．
-                        FOVの規定に用いる．Defaults to float("inf")
+        radius (float): radius to calculate r-limited voronoi.
+                        Used for FOV settings. Defaults to float("inf")
 
     Note:
-        各領域内の離散点に相当する位置にはTrue，それ以外にはFalseを割り当てる．
-        記号表記はH.Dan et al. 2020に倣う
+        Assign True to positions corresponding to discrete points within each region, and False to all other positions.
+        The notation follows H.Dan et al. 2020.
 
-        voronoi_region (NDArray): ボロノイ領域（V_{i}）
-        fov_region (NDArray): 円形センサーモデルによる視野（B_{i}）．
-                              デフォルトではボロノイ領域のみを考慮するよう半径を無限大でとっている．
-        sensing_region (NDArray): センシング領域（S_{i}=V_{i} \bigcap B_{i}）
+        voronoi_region (NDArray): Voronoi region (V_{i})
+        fov_region (NDArray): Field of view (B_{i}) based on circular sensor model.
+                              By default, the radius is set to infinity to consider only the Voronoi region.
+        sensing_region (NDArray): Sensing region (S_{i}=V_{i} \bigcap B_{i})
     """
 
     p: float = 2
@@ -37,24 +37,24 @@ class Voronoi:
         grid_map: List[NDArray],
         point_density: float,
     ) -> Tuple[NDArray, List[NDArray], NDArray]:
-        """ボロノイ分割を計算
+        """Calculate Voronoi tessellation
 
         Args:
-            agent_position (NDArray): ボロノイ領域の母点
-            neighbor_agent_position_list (List[NDArray]): 近隣の母点．少なくとも近隣が全て含まれていれば良いため，
-                                                          その他の母点が含まれていても，計算上は特に問題はない．
-            phi (NDArray): 重要度マップ
-            grid_map (List[NDArray]): フィールド離散点の各座標．[x_grid_map, y_grid_map, ...]
-            point_density (float): 離散点の密度．離散点1つの担当する面積/体積に相当．
+            agent_position (NDArray): Voronoi region generator point
+            neighbor_agent_position_list (List[NDArray]): Neighbor generator points. It is sufficient enough to include all neighbors,
+                                                          and including other generator points not to cause any issues in the calculation.
+            phi (NDArray): Importance map
+            grid_map (List[NDArray]): Positions of discrete points. [x_grid_map, y_grid_map, ...]
+            point_density (float): Discrete point density. Corresponds to the area/volume assigned to each discrete point.
 
         Returns:
             Tuple[NDArray, List[NDArray], NDArray]:
-            ボロノイ重心，ボロノイ領域を示す離散点の座標集合（grid_mapと合わせて座標軸ごとにまとめてリストの要素とする），ボロノイ領域内外を1/0で示したマップ
+            Voronoi centroid, a collection of discrete points coordinates indicating the Voronoi region (combined with grid_map to form elements for each axis), and a map indicating whether points are inside or outside the Voronoi region (1/0).
         """
 
         dim = len(grid_map)
 
-        # ボロノイ領域を初期化
+        # Initialize Voronoi region
         voronoi_region: NDArray = np.ones_like(grid_map[0], dtype=np.bool_)
 
         assert self.p >= 1 and self.radius > 0
@@ -66,15 +66,15 @@ class Voronoi:
                 [abs(grid_map[i] - neighbor_agent_position[i]) ** self.p for i in range(dim)]
             ) ** (1 / self.p)
 
-            # 近隣エージェント（neighbor_agent_position）より自分（agent_position）からの方が近い点を抽出
+            # Extract points closer to self (agent_position) than to neighbor_agent_position
             near_region = distance_from_neighbor_agent > distance_from_agent
-            # near_regionの積算により自分が最も近いエージェントとなる離散点を抽出
+            # Extract discrete points for which self is the closest agent
             voronoi_region *= near_region
 
-        # ボロノイ領域と視野の積集合
+        # Intersection of Voronoi region and field of view
         sensing_region = voronoi_region * fov_region
 
-        # センシング領域の重心計算
+        # Calculate centroid position of sensing region
         centroid_position = self.calc_centroid_position(grid_map, phi, sensing_region, point_density, dim)
         sensing_region_grid_points = [grid_map[i][sensing_region] for i in range(dim)]
         return centroid_position, sensing_region_grid_points, sensing_region

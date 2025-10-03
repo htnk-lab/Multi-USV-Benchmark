@@ -33,8 +33,8 @@ class IdealAgent(Node):
             "r_min", 0.2, descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_DOUBLE),
         )
         # get parameter
-        # curr_pose初期化
-        # parameterのinit_positionの要素数が足りない場合，対応するPointの要素は0.0で初期化される
+        # initialize curr_pose
+        # if the number of elements in the parameter init_position is insufficient, the corresponding elements of Point are initialized to 0.0
         self.curr_pose = Pose(
             position=Point(**dict(zip(["x", "y", "z"], self.get_parameter("init_position").value))),
             orientation=Quaternion(
@@ -52,7 +52,7 @@ class IdealAgent(Node):
 
         self.v = 0.0
         self.omega = 0.0
-        self.z = 0.08  # robotモデルを水上へ表示するためのオフセット
+        self.z = 0.08  # offset to display robot model above water surface
 
         # pub
         self.pose_pub = self.create_publisher(PoseStamped, "pose", 10)
@@ -64,7 +64,7 @@ class IdealAgent(Node):
         self.create_timer(self.dt, self.timer_callback)
 
     def cmd_vel_callback(self, msg: Twist) -> None:
-        # 並進速度/回転速度
+        # linear and angular velocity
         self.v = msg.linear.x
         self.omega = msg.angular.z
 
@@ -72,7 +72,7 @@ class IdealAgent(Node):
         orientation = self.curr_pose.orientation
         _, _, yaw = euler_from_quaternion(quaternion=[orientation.x, orientation.y, orientation.z, orientation.w])
 
-        # unicycle model
+        # Dubins car model
         position = self.curr_pose.position
         self.curr_pose.position = Point(
             x=position.x + self.dt * np.cos(yaw) * self.v,

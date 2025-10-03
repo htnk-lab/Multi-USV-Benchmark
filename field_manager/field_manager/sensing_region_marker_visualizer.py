@@ -15,7 +15,7 @@ from .coverage_utils.utils import color_list, get_color_rgba, multiarray_to_ndar
 
 
 class SensingRegionMarkerVisualizer(Node):
-    """Markerを用いてセンシング領域を可視化"""
+    """Visualize sensing region using Marker"""
 
     def __init__(self) -> None:
         super().__init__("sensing_region_marker_visualizer")
@@ -50,10 +50,10 @@ class SensingRegionMarkerVisualizer(Node):
 
         field_generator = FieldGenerator(grid_accuracy=grid_accuracy, limit=limit)
         self.grid_map = field_generator.generate_grid_map()
-        # 次元に応じて適切な透過度を選択
+        # Select appropriate transparency according to dimension
         self.alpha = 0.7 - 0.15 * self.dim
 
-        # センシング領域描画用のMarkerを作成
+        # Create Marker for sensing region visualization
         self.sensing_region_marker = Marker(
             header=Header(
                 stamp=self.get_clock().now().to_msg(),
@@ -82,13 +82,13 @@ class SensingRegionMarkerVisualizer(Node):
         self.create_subscription(Int8MultiArray, "sensing_region", self.sensing_region_callback, 10)
 
     def sensing_region_callback(self, msg: Int8MultiArray) -> None:
-        """Int8Multiarrayからpointcloudを生成してpublish
+        """Generate pointcloud from Int8Multiarray and publish it
 
         Args:
-            msg (Int8MultiArray): センシング領域
+            msg (Int8MultiArray): Sensing region
 
         Note:
-            センシング領域の格子点計算に際しては，以下の並びになるようreshapeと転置により整形
+            When calculating grid points of the sensing region, arrange the order by reshaping and transposing as follows:
             [[x1, y1, ...],
             [x2, y2, ...]
                 :
@@ -100,7 +100,7 @@ class SensingRegionMarkerVisualizer(Node):
         )
 
         self.sensing_region_marker.header.stamp = self.get_clock().now().to_msg()
-        # 2次元以下の場合は足りない座標分を0埋め
+        # If the dimension is less than or equal to 2, fill the missing coordinates with 0
         self.sensing_region_marker.points = [
             Point(**dict(zip(["x", "y", "z"], point)))
             for point in [padding(point) for point in sensing_region_grid_points]
