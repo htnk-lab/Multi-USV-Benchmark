@@ -25,9 +25,7 @@ def launch_setup(
     assert agent_num in range(1, 6), f"invalid agent_num: {agent_num}"
 
     pkg_benchmark_main = get_package_share_directory("benchmark_main")
-    pkg_robot_model = get_package_share_directory("robot_model")
     pkg_field_manager = get_package_share_directory("field_manager")
-
     rviz_config = os.path.join(pkg_field_manager, "rviz", "field.rviz")
     assert os.path.exists(rviz_config)
     rviz_node = Node(
@@ -37,13 +35,11 @@ def launch_setup(
     )
 
     field_config = os.path.join(pkg_field_manager, "config", "field.params.yaml")
-    robot_config = os.path.join(pkg_robot_model, "config", "robot.params.yaml")
 
     # group actionでまとめることでconfigを共通で与える
     central_group = GroupAction(
         actions=[
             SetParametersFromFile(field_config),
-            SetParametersFromFile(robot_config),
             Node(
                 package="field_manager",
                 executable="pose_collector",
@@ -56,27 +52,20 @@ def launch_setup(
             ),
             # Node(package="field_manager", executable="phi_marker_visualizer"),
             Node(package="field_manager", executable="phi_pointcloud_visualizer"),
-            Node(package="joy", executable="joy_node"),
-            Node(
-                package="field_manager",
-                executable="pool_visualizer",
-                output="screen",
-            ),
         ]
     )
 
     agent_launch_list = [
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                [os.path.join(pkg_benchmark_main, "launch", "agent.launch.py")]
-            ),
-            launch_arguments={
-                "field_config": field_config,
-                "robot_config": robot_config,
-                "agent_id": str(agent_id),
-            }.items(),
-        )
-        for agent_id in range(agent_num)
+        # IncludeLaunchDescription(
+        #     PythonLaunchDescriptionSource(
+        #         [os.path.join(pkg_benchmark_main, "launch", "agent.launch.py")]
+        #     ),
+        #     launch_arguments={
+        #         "field_config": field_config,
+        #         "agent_id": str(agent_id),
+        #     }.items(),
+        # )
+        # for agent_id in range(agent_num)
     ]
     # nodeの起動順に起因するagentのジャンプを防ぐため，central系を後に
     return agent_launch_list + [rviz_node, central_group]
