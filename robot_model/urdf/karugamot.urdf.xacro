@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<robot name="karugamot"
+  xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:include filename="$(find robot_model)/urdf/common_properties.xacro"/>
+
+  <!-- 複数台を想定 -->
+  <xacro:arg name="robot_id" default=""/>
+  <xacro:arg name="robot_prefix" default="agent"/>
+  <xacro:arg name="robot_frame" default=""/>
+
+  <link name="$(arg robot_prefix)$(arg robot_id)/$(arg robot_frame)">
+    <visual>
+      <origin xyz="0 0 -0.1" rpy="0 0 ${pi/2}"/>
+      <geometry>
+        <mesh filename="package://robot_model/meshes/karugamot.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="light_grey"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 -0.1" rpy="0 0 ${pi/2}"/>
+      <geometry>
+        <mesh filename="package://robot_model/meshes/karugamot.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+</robot>
