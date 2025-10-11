@@ -50,7 +50,7 @@ def launch_setup(
         output='screen'
     )
 
-    # group actionでまとめることでconfigを共通で与える
+    # By using GroupAction, configs are provided commonly across nodes
     central_fields_nodes = GroupAction(
         actions=[
             SetParametersFromFile(central_config),
@@ -94,7 +94,7 @@ def launch_setup(
         )
         for agent_id in range(agent_num)
     ]
-    # nodeの起動順に起因するagentのジャンプを防ぐため，central系を後に
+    # To prevent agent jumps due to node startup order, launch central nodes later
     return ([logging_node] if bag_name else []) + agent_launch_list + [visualization_node, central_fields_nodes]
 
 

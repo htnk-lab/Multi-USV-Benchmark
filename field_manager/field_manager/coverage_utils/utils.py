@@ -7,8 +7,8 @@ import numpy as np
 from numpy.typing import NDArray
 from std_msgs.msg import ColorRGBA, MultiArrayDimension
 
-# 各種描画に使う色を定義
-# list(mcolors.TABELAU_COLORS.values())も使用可能
+# Define the colors used for various visualizations
+# alternative: list(mcolors.TABELAU_COLORS.values())
 color_list = ["r", "g", "b", "m", "c", "y"]
 
 
@@ -17,18 +17,18 @@ def padding(
     return_list_length: int = 3,
     padding_value: float = 0.0,
 ) -> List[float]:
-    """1~3次元それぞれへの対応として，後半部分を0 or 指定した値で埋める
+    """To handle 1~3 dimensions, fill the latter part with 0 or a specified value
 
     Args:
-        original_array (Sequence): 元の配列
-        return_list_length (int): 埋めた後のリストのサイズ．Defaults to 3.
-        padding_value (float): 埋める際に用いる値. Defaults to 0.
+        original_array (Sequence): The original array
+        return_list_length (int): The size of the list after padding. Defaults to 3.
+        padding_value (float): The value to use for padding. Defaults to 0.
 
     Returns:
-        List[float]: 埋めた結果のリスト
+        List[float]: The padded result list
 
     Note:
-        結果を渡す先にPoint, Vector3を想定しているのでreturn_list_lengthのデフォルト値を3に設定している．
+        We set the default value of return_list_length to 3, assuming that the result will be used as a Point or Vector3.
     #"""
     original_array_length = len(original_array)
     return [(original_array[i] if i < original_array_length else padding_value) for i in range(return_list_length)]
@@ -62,10 +62,10 @@ def multiarray_to_ndarray(pytype: Any, dtype: Any, multiarray: MultiArray) -> ND
 
 
 # def smooth_ramp(x: Union[float, NDArray]) -> NDArray:
-#     """連続なランプ関数
+#     """continuous ramp function
 # 
 #     Note:
-#         f(x) = \exp{-SR(x^2-R^2)^2}で山が平らに潰れた凹型の関数が得られる
+#         f(x) = \exp{-SR(x^2-R^2)^2} is a function that produces a flattened concave shape
 #         ____      ____
 #             \____/
 #     """

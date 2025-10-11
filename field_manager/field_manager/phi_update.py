@@ -74,7 +74,7 @@ class PhiUpdate(Node):
         field_generator = FieldGenerator(grid_accuracy=grid_accuracy, limit=limit)
         self.grid_map = field_generator.generate_grid_map()
 
-        # initialize importance distribution
+        # Initialize importance distribution
         self.phi = field_generator.generate_phi()
 
         self.dt = float(self.get_parameter("dt").value)
@@ -147,7 +147,7 @@ class PhiUpdate(Node):
             )
             * region
         )
-        # [0, 1]範囲にクリッピング
+        # Clip to [0, 1] range
         np.clip(phi, 0.01, 1.0, out=phi)
         return phi
 

@@ -19,7 +19,7 @@ class Data:
 
 
 class PoseCollector(Node):
-    """エージェントの位置姿勢を収集"""
+    """Collect all agents' current poses and publish them as a PoseArray"""
 
     def __init__(self) -> None:
         super().__init__("pose_collector")
@@ -49,7 +49,7 @@ class PoseCollector(Node):
         self.curr_pose_array_pub = self.create_publisher(PoseArray, "curr_pose_array", 10)
 
         # sub
-        # agentの数とnamespaceに対応してsubscriptionとcallbackを登録
+        # Set subscription and callback functions depending on agent number and namespace
         for agent_id in range(agent_num):
             agent_name = agent_prefix + str(agent_id)
             topic_name = agent_name + "/curr_pose"
@@ -63,9 +63,9 @@ class PoseCollector(Node):
         self.data_list[agent_id] = Data(curr_pose=msg, is_ready=True)
 
     def timer_callback(self) -> None:
-        # 全agentのcurr_poseが揃い，is_ready==Trueとなるまでpublishしない
+        # Unpublish unless all agents' poses are collected (is_ready==True)
         if self.is_ready:
-            # agent_id順に現在位置を格納
+            # Store current poses in the order of agent_id
             curr_pose_array = [data.curr_pose for data in self.data_list]
             self.curr_pose_array_pub.publish(
                 PoseArray(
