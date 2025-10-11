@@ -24,7 +24,7 @@ sudo apt-get install ros-humble-tf-transformations
 ```
 
 ```sh
-vcs import < .repos
+vcs import src < .repos
 ```
 
 ## License
@@ -48,10 +48,10 @@ Run the following command to start the program:
 ros2 launch benchmark_main main.launch.py num:=2 name:=Data0
 ```
 - ### Parameters
-| Name  | Description               | Type        | Default | Min | Max | Note                |
-|-------|---------------------------|-------------|---------|-----|-----|---------------------|
-| `num` | Number of agents          | Natural int | 2       | 1   | 4   | Must be a natural number (≥1).|
-| `name` | Name of the output rosbag          | String | Data       | -   | -   | Must not be empty. Must not match the name of any existing file in the save path. |
+| Name   | Description               | Type        | Default | Min | Max | Note                                                                              |
+| ------ | ------------------------- | ----------- | ------- | --- | --- | --------------------------------------------------------------------------------- |
+| `num`  | Number of agents          | Natural int | 2       | 1   | 4   | Must be a natural number (≥1).                                                    |
+| `name` | Name of the output rosbag | String      | Data    | -   | -   | Must not be empty. Must not match the name of any existing file in the save path. |
 
 
 To stop the simulation, press `Ctrl + C`.
