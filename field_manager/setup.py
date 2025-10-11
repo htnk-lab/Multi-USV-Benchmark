@@ -32,6 +32,8 @@ setup(
             "phi_marker_visualizer = field_manager.phi_marker_visualizer:main",
             "phi_pointcloud_visualizer = field_manager.phi_pointcloud_visualizer:main",
             "pose_collector = field_manager.pose_collector:main",
+            "vel_collector = field_manager.vel_collector:main",
+            "sensing_region_calculator = field_manager.sensing_region_calculator:main",
             "sensing_region_marker_visualizer = field_manager.sensing_region_marker_visualizer:main",
             "sensing_region_pointcloud_visualizer = field_manager.sensing_region_pointcloud_visualizer:main",
             "pool_visualizer = field_manager.pool_visualizer:main",

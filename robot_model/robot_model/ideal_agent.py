@@ -1,19 +1,21 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+
 import traceback
 
 import numpy as np
 import rclpy
-from geometry_msgs.msg import Point, Pose, PoseStamped, Quaternion
+from geometry_msgs.msg import Point, Pose, PoseStamped, Quaternion, Twist
 from rcl_interfaces.msg import ParameterDescriptor, ParameterType
 from rclpy.node import Node
-from std_msgs.msg import Header, Float32
-from tf_transformations import quaternion_from_euler
+from std_msgs.msg import Header
+from tf_transformations import euler_from_quaternion, quaternion_from_euler
 
 
-class KinematicAgent(Node):
+class IdealAgent(Node):
+    """Ideal mathmatical model"""
 
-    def __init__(self):
-        super().__init__("kinematic_agent")
+    def __init__(self) -> None:
+        super().__init__("ideal_agent")
 
         # declare parameter
         self.declare_parameter(
@@ -25,13 +27,7 @@ class KinematicAgent(Node):
             "world_frame", "world", descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_STRING)
         )
         self.declare_parameter(
-            "agent_frame", "base", descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_STRING)
-        )
-        self.declare_parameter(
             "dt", 0.1, descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_DOUBLE)
-        )
-        self.declare_parameter(
-            "init_forward_velocity", 0.26, descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_DOUBLE)
         )
 
         # get parameter
@@ -49,44 +45,49 @@ class KinematicAgent(Node):
             ),
         )
         self.world_frame = str(self.get_parameter("world_frame").value)
-        self.agent_frame = str(self.get_namespace() + "/" + self.get_parameter("agent_frame").value)
         self.dt = float(self.get_parameter("dt").value)
-        self.forward_vel = float(self.get_parameter("init_forward_velocity").value)
 
-        self.target_angle = 0.0
+        self.v = 0.0
+        self.omega = 0.0
+        self.z = 0.08  # karugamotモデルを水上へ表示するためのオフセット
 
         # pub
         self.pose_pub = self.create_publisher(PoseStamped, "pose", 10)
 
         # sub
-        self.create_subscription(Float32, "target_angle", self.angle_callback, 10)
+        self.create_subscription(Twist, "cmd_vel", self.cmd_vel_callback, 10)
 
         # timer
         self.create_timer(self.dt, self.timer_callback)
 
-    def angle_callback(self, msg: Float32) -> None:
-        self.target_angle = msg.data
+    def cmd_vel_callback(self, msg: Twist) -> None:
+        # 並進速度/回転速度
+        self.v = msg.linear.x
+        self.omega = msg.angular.z
 
     def timer_callback(self) -> None:
+        orientation = self.curr_pose.orientation
+        _, _, yaw = euler_from_quaternion(quaternion=[orientation.x, orientation.y, orientation.z, orientation.w])
+
         # unicycle model
         position = self.curr_pose.position
         self.curr_pose.position = Point(
-            x=position.x + self.dt * np.cos(self.target_angle) * self.forward_vel,
-            y=position.y + self.dt * np.sin(self.target_angle) * self.forward_vel,
+            x=position.x + self.dt * np.cos(yaw) * self.v,
+            y=position.y + self.dt * np.sin(yaw) * self.v,
+            z=self.z,
         )
 
         self.curr_pose.orientation = Quaternion(
             **dict(
                 zip(
                     ["x", "y", "z", "w"],
-                    quaternion_from_euler(ai=0.0, aj=0.0, ak=self.target_angle),
+                    quaternion_from_euler(ai=0.0, aj=0.0, ak=yaw + self.dt * self.omega),
                 )
             )
         )
 
         curr_pose = self.curr_pose
-
-        # for footprinter
+        # publish
         self.pose_pub.publish(
             PoseStamped(
                 header=Header(
@@ -99,14 +100,14 @@ class KinematicAgent(Node):
 
 def main() -> None:
     rclpy.init()
-    kinematic_agent = KinematicAgent()
+    ideal_agent = IdealAgent()
 
     try:
-        rclpy.spin(kinematic_agent)
+        rclpy.spin(ideal_agent)
     except:
-        kinematic_agent.get_logger().error(traceback.format_exc())
+        ideal_agent.get_logger().error(traceback.format_exc())
     finally:
-        kinematic_agent.destroy_node()
+        ideal_agent.destroy_node()
         rclpy.shutdown()
 
 

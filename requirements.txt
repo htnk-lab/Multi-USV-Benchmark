@@ -10,3 +10,4 @@ sympy
 numpy
 scipy
 matplotlib
+git+https://github.com/rdesc/pydubins.git

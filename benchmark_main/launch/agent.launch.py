@@ -17,10 +17,12 @@ from launch.substitutions import LaunchConfiguration
 def launch_setup(context: LaunchContext) -> List[GroupAction]:
     field_config = LaunchConfiguration("field_config")
     robot_config = LaunchConfiguration("robot_config")
+    los_config = LaunchConfiguration("los_config")
 
     # LaunchConfigurationの中身を取得
     agent_prefix = LaunchConfiguration("agent_prefix", default="agent").perform(context)
     agent_id = LaunchConfiguration("agent_id").perform(context)
+    agent_num = LaunchConfiguration("agent_num").perform(context)
     agent_name = agent_prefix + agent_id
 
     # rviz上にロボットの3Dモデルを表示するための処理
@@ -38,8 +40,10 @@ def launch_setup(context: LaunchContext) -> List[GroupAction]:
         actions=[
             PushRosNamespace(agent_name),
             SetParameter(name="agent_id", value=agent_id),
+            SetParameter(name="agent_num", value=agent_num),
             SetParametersFromFile(field_config),
             SetParametersFromFile(robot_config),
+            SetParametersFromFile(los_config),
             Node(
                 package="robot_state_publisher",
                 executable="robot_state_publisher",
@@ -47,7 +51,7 @@ def launch_setup(context: LaunchContext) -> List[GroupAction]:
             ),
             Node(
                 package="robot_model",
-                executable="kinematic_agent",
+                executable="ideal_agent",
             ),
             Node(
                 package="robot_model",
@@ -58,9 +62,29 @@ def launch_setup(context: LaunchContext) -> List[GroupAction]:
                 executable="joy_controller",
             ),
             Node(
+                package="los_controller",
+                executable="waypoints_generator",
+            ),
+            Node(
+                package="los_controller",
+                executable="los",
+            ),
+            Node(
+                package="los_controller",
+                executable="angle_fbcontroller",
+            ),
+            Node(
+                package="field_manager",
+                executable="sensing_region_calculator",
+            ),
+            Node(
                 package="field_manager",
                 executable="sensing_region_marker_visualizer",
             ),
+            Node(
+                package="robot_model",
+                executable="footprinter",
+            )
             # Node(
             #     package="field_manager",
             #     executable="sensing_region_pointcloud_visualizer",
