@@ -1,20 +1,19 @@
 /**:
   ros__parameters:
-    world_frame: "world"
+    # parameters that do not need to be changed
+    world_frame: "world" 
     pool_frame: "pool_origin"
     agent_frame: "base"
     agent_prefix: "agent"
-
-    pool_stl_file_name: "aqua_pool.stl"
-    pool_origin_position: [0.87, 1.07, 0.2]
-
-    kp: 1.0 # P-gain
+    x_limit: [-1.5, 3.0] # 4.5m
+    y_limit: [0.2, 1.9] # 1.7m
+    pool_stl_file_name: "field.stl"
+    
+    # pose updating rate 
     dt: 0.1 # [s]
 
     # field parameters
     grid_accuracy: [90, 34]
-    x_limit: [-1.5, 3.0] # 4.5m
-    y_limit: [0.2, 1.9] # 1.7m
 
     # phi update parameters
     delta_increase: 0.1

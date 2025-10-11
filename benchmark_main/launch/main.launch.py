@@ -12,6 +12,7 @@ from launch.actions import (
     GroupAction,
     IncludeLaunchDescription,
     OpaqueFunction,
+    ExecuteProcess,
 )
 from launch.launch_context import LaunchContext
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -23,30 +24,38 @@ def launch_setup(
 ) -> List[Union[Node, GroupAction, LaunchDescription]]:
     agent_num = int(LaunchConfiguration("num", default=2).perform(context))
     assert agent_num in range(1, 5), f"invalid agent_num: {agent_num}"
+    bag_name = str(LaunchConfiguration("name", default="").perform(context))
+    cwd = os.getcwd()
+    bag_path = os.path.join(cwd, "src/Multi-USV-Benchmark/ros2bag2csv", bag_name)
 
     pkg_benchmark_main = get_package_share_directory("benchmark_main")
     pkg_robot_model = get_package_share_directory("robot_model")
     pkg_field_manager = get_package_share_directory("field_manager")
-    pkg_los_controller = get_package_share_directory("los_controller")
-
+    pkg_controller = get_package_share_directory("controller")
+    
+    central_config = os.path.join(pkg_field_manager, "config", "central.params.yaml")
+    robot_config = os.path.join(pkg_robot_model, "config", "robot.params.yaml")
+    controller_config = os.path.join(pkg_controller, "config", "controller.params.yaml")
     rviz_config = os.path.join(pkg_field_manager, "rviz", "field.rviz")
     assert os.path.exists(rviz_config)
-    rviz_node = Node(
+    
+    visualization_node = Node(
         package="rviz2",
         executable="rviz2",
         arguments=["-d", rviz_config],
     )
 
-    field_config = os.path.join(pkg_field_manager, "config", "field.params.yaml")
-    robot_config = os.path.join(pkg_robot_model, "config", "robot.params.yaml")
-    los_config = os.path.join(pkg_los_controller, "config", "los.params.yaml")
+    logging_node = ExecuteProcess(
+        cmd=['ros2', 'bag', 'record', '-o', bag_path, '-a'],
+        output='screen'
+    )
 
     # group actionでまとめることでconfigを共通で与える
-    central_group = GroupAction(
+    central_fields_nodes = GroupAction(
         actions=[
-            SetParametersFromFile(field_config),
+            SetParametersFromFile(central_config),
             SetParametersFromFile(robot_config),
-            SetParametersFromFile(los_config),
+            SetParametersFromFile(controller_config),
             SetParameter(name="agent_num", value=agent_num),
             Node(
                 package="field_manager",
@@ -55,13 +64,11 @@ def launch_setup(
             ),
             Node(
                 package="field_manager",
-                executable="central",
+                executable="phi_update",
             ),
-            # Node(package="field_manager", executable="phi_marker_visualizer"),
             Node(package="field_manager", executable="phi_pointcloud_visualizer"),
-            Node(package="joy", executable="joy_node"),
             Node(
-                package="los_controller",
+                package="field_manager",
                 executable="convex_polygon_creator",
             ),
             Node(
@@ -78,9 +85,9 @@ def launch_setup(
                 [os.path.join(pkg_benchmark_main, "launch", "agent.launch.py")]
             ),
             launch_arguments={
-                "field_config": field_config,
+                "central_config": central_config,
                 "robot_config": robot_config,
-                "los_config": los_config,
+                "controller_config": controller_config,
                 "agent_id": str(agent_id),
                 "agent_num": str(agent_num),
             }.items(),
@@ -88,11 +95,12 @@ def launch_setup(
         for agent_id in range(agent_num)
     ]
     # nodeの起動順に起因するagentのジャンプを防ぐため，central系を後に
-    return agent_launch_list + [rviz_node, central_group]
+    return ([logging_node] if bag_name else []) + agent_launch_list + [visualization_node, central_fields_nodes]
 
 
 def generate_launch_description() -> LaunchDescription:
-    DeclareLaunchArgument("num", description="< 5")
+    DeclareLaunchArgument("num", description="Number of agents")
+    DeclareLaunchArgument("name", description="Name of the output rosbag")
 
     # Create the launch description and populate
     ld = LaunchDescription()

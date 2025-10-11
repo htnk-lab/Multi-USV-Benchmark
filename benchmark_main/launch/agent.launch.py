@@ -15,9 +15,9 @@ from launch.substitutions import LaunchConfiguration
 
 
 def launch_setup(context: LaunchContext) -> List[GroupAction]:
-    field_config = LaunchConfiguration("field_config")
+    central_config = LaunchConfiguration("central_config")
     robot_config = LaunchConfiguration("robot_config")
-    los_config = LaunchConfiguration("los_config")
+    controller_config = LaunchConfiguration("controller_config")
 
     # LaunchConfigurationの中身を取得
     agent_prefix = LaunchConfiguration("agent_prefix", default="agent").perform(context)
@@ -27,7 +27,7 @@ def launch_setup(context: LaunchContext) -> List[GroupAction]:
 
     # rviz上にロボットの3Dモデルを表示するための処理
     pkg_robot_model = get_package_share_directory("robot_model")
-    xacro_file_path = os.path.join(pkg_robot_model, "urdf", "karugamot.urdf.xacro")
+    xacro_file_path = os.path.join(pkg_robot_model, "urdf", "robot.urdf.xacro")
     assert os.path.exists(xacro_file_path)
 
     # xacro:argを用いてxacroファイル変数を渡すことができる
@@ -36,14 +36,30 @@ def launch_setup(context: LaunchContext) -> List[GroupAction]:
     robot_desc = doc.toxml()
 
     # GroupActionによりnamespaceやparameterを一括して与える
-    agent_group = GroupAction(
+    central_agent_nodes = GroupAction(
         actions=[
             PushRosNamespace(agent_name),
             SetParameter(name="agent_id", value=agent_id),
             SetParameter(name="agent_num", value=agent_num),
-            SetParametersFromFile(field_config),
+            SetParametersFromFile(central_config),
+            Node(
+                package="field_manager",
+                executable="sensing_region_calculator",
+            ),
+            Node(
+                package="field_manager",
+                executable="sensing_region_marker_visualizer",
+            ),
+        ]
+    )
+
+    robot_nodes = GroupAction(
+        actions=[
+            PushRosNamespace(agent_name),
+            SetParameter(name="agent_id", value=agent_id),
+            SetParameter(name="agent_num", value=agent_num),
+            SetParametersFromFile(central_config),
             SetParametersFromFile(robot_config),
-            SetParametersFromFile(los_config),
             Node(
                 package="robot_state_publisher",
                 executable="robot_state_publisher",
@@ -58,44 +74,38 @@ def launch_setup(context: LaunchContext) -> List[GroupAction]:
                 executable="posest2posevel",
             ),
             Node(
-                package="los_controller",
-                executable="joy_controller",
+                package="robot_model",
+                executable="footprinter",
             ),
+        ]
+    )
+
+    controller_nodes = GroupAction(
+        actions=[
+            PushRosNamespace(agent_name),
+            SetParameter(name="agent_id", value=agent_id),
+            SetParameter(name="agent_num", value=agent_num),
+            SetParametersFromFile(central_config),
+            SetParametersFromFile(controller_config),
             Node(
-                package="los_controller",
+                package="controller",
                 executable="waypoints_generator",
             ),
             Node(
-                package="los_controller",
+                package="controller",
                 executable="los",
             ),
             Node(
-                package="los_controller",
+                package="controller",
                 executable="angle_fbcontroller",
             ),
-            Node(
-                package="field_manager",
-                executable="sensing_region_calculator",
-            ),
-            Node(
-                package="field_manager",
-                executable="sensing_region_marker_visualizer",
-            ),
-            Node(
-                package="robot_model",
-                executable="footprinter",
-            )
-            # Node(
-            #     package="field_manager",
-            #     executable="sensing_region_pointcloud_visualizer",
-            # ),
         ],
     )
-    return [agent_group]
+    return [central_agent_nodes, robot_nodes, controller_nodes]
 
 
 def generate_launch_description() -> LaunchDescription:
-    DeclareLaunchArgument("field_config")
+    DeclareLaunchArgument("central_config")
     DeclareLaunchArgument("agent_prefix")
     DeclareLaunchArgument("agent_id")
 
