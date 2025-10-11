@@ -24,7 +24,7 @@ sudo apt-get install ros-humble-tf-transformations
 ```
 
 ```sh
-vcs import src < .repos
+vcs import < .repos
 ```
 
 ## License
@@ -63,6 +63,7 @@ After the simulation is finished, you can extract the required　data from the g
 cd src/Multi-USV-Benchmark/ros2bag2csv
 ```
 Instructions for how to run ros2bagcsv.py are provided in the README of the following repository:
-https://github.com/toshi67026/ros2bag2csv/tree/757a36f1401ddc039c3a5b88b6476155cf678b85
+https://github.com/toshi67026/ros2bag2csv
+
 ## Maintainer
 - [Toshiyuki Oshima](https://github.com/toshi67026)
