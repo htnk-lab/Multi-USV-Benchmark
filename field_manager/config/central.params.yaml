@@ -16,6 +16,6 @@
     grid_accuracy: [90, 34]
 
     # phi update parameters
-    delta_increase: 0.1
-    delta_decrease: 1.0
-    sensing_radius: 0.3
+    delta_increase: 0.02
+    delta_decrease: 0.5
+    sensing_radius: 0.2
