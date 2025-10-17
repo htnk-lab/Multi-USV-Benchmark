@@ -60,7 +60,7 @@ To stop the simulation, press `Ctrl + C`.
 After the simulation is finished, you can extract the required　data from the generated bag file(.db3) and convert it into CSV format using `ros2bag2csv.py`. To use it, first navigate to the `ros2bag2csv` directory:
 
 ```sh
-cd src/Multi-USV-Benchmark/ros2bag2csv
+cd ~/ros2_ws/src/Multi-USV-Benchmark/ros2bag2csv
 ```
 Instructions for how to run ros2bagcsv.py are provided in the README of the following repository:
 https://github.com/toshi67026/ros2bag2csv
