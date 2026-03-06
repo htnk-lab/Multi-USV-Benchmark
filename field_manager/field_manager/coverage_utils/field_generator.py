@@ -50,15 +50,3 @@ class FieldGenerator:
             List[NDArray]: lattice points of each coordinate of the field. [x_grid_map, y_grid_map, ...]
         """
         return np.meshgrid(*self.linspace, indexing="ij")
-
-
-def test() -> None:
-    limit = np.array([[-1, 1], [-2, 2]])
-    grid_accuracy = np.array([100, 200])
-    generator = FieldGenerator(grid_accuracy=grid_accuracy, limit=limit)
-    x_grid_map, y_grid_map = generator.generate_grid_map()
-    print(f"x.shape: {x_grid_map.shape}, y.shape: {y_grid_map.shape}")
-
-
-if __name__ == "__main__":
-    test()

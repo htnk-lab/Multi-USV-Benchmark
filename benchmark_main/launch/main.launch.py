@@ -9,10 +9,10 @@ from launch_ros.actions import Node, SetParameter, SetParametersFromFile
 from launch import LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
+    ExecuteProcess,
     GroupAction,
     IncludeLaunchDescription,
     OpaqueFunction,
-    ExecuteProcess,
 )
 from launch.launch_context import LaunchContext
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -22,9 +22,9 @@ from launch.substitutions import LaunchConfiguration
 def launch_setup(
     context: LaunchContext,
 ) -> List[Union[Node, GroupAction, LaunchDescription]]:
-    agent_num = int(LaunchConfiguration("num", default=2).perform(context))
+    agent_num = int(LaunchConfiguration("num").perform(context))
     assert agent_num in range(1, 5), f"invalid agent_num: {agent_num}"
-    bag_name = str(LaunchConfiguration("name", default="").perform(context))
+    bag_name = str(LaunchConfiguration("name").perform(context))
     cwd = os.getcwd()
     bag_path = os.path.join(cwd, "src/Multi-USV-Benchmark/ros2bag2csv", bag_name)
 
@@ -32,13 +32,13 @@ def launch_setup(
     pkg_robot_model = get_package_share_directory("robot_model")
     pkg_field_manager = get_package_share_directory("field_manager")
     pkg_controller = get_package_share_directory("controller")
-    
+
     central_config = os.path.join(pkg_field_manager, "config", "central.params.yaml")
     robot_config = os.path.join(pkg_robot_model, "config", "robot.params.yaml")
     controller_config = os.path.join(pkg_controller, "config", "controller.params.yaml")
     rviz_config = os.path.join(pkg_field_manager, "rviz", "field.rviz")
     assert os.path.exists(rviz_config)
-    
+
     visualization_node = Node(
         package="rviz2",
         executable="rviz2",
@@ -46,11 +46,10 @@ def launch_setup(
     )
 
     logging_node = ExecuteProcess(
-        cmd=['ros2', 'bag', 'record', '-o', bag_path, '-a'],
-        output='screen'
+        cmd=["ros2", "bag", "record", "-o", bag_path, "-a"],
+        output="screen",
     )
 
-    # By using GroupAction, configs are provided commonly across nodes
     central_fields_nodes = GroupAction(
         actions=[
             SetParametersFromFile(central_config),
@@ -99,12 +98,10 @@ def launch_setup(
 
 
 def generate_launch_description() -> LaunchDescription:
-    DeclareLaunchArgument("num", description="Number of agents")
-    DeclareLaunchArgument("name", description="Name of the output rosbag")
-
-    # Create the launch description and populate
     ld = LaunchDescription()
 
+    ld.add_action(DeclareLaunchArgument("num", default_value="2", description="Number of agents"))
+    ld.add_action(DeclareLaunchArgument("name", default_value="", description="Name of the output rosbag"))
     ld.add_action(OpaqueFunction(function=launch_setup))
 
     return ld

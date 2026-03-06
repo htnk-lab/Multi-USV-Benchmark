@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import os
-import traceback
 
 import rclpy
 from ament_index_python.packages import get_package_share_directory
@@ -14,10 +13,11 @@ from visualization_msgs.msg import Marker
 
 
 class PoolVisualizer(Node):
+    """Visualize pool/field geometry as a mesh in RViz"""
+
     def __init__(self) -> None:
         super().__init__("pool_visualizer")
 
-        # declare parameter
         self.declare_parameter(
             "world_frame", "world", descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_STRING)
         )
@@ -27,19 +27,24 @@ class PoolVisualizer(Node):
         self.declare_parameter(
             "pool_stl_file_name", "field.stl", descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_STRING)
         )
-
         self.declare_parameter(
-            "dt", 0.1, descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_STRING)
+            "dt", 0.1, descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_DOUBLE)
+        )
+        self.declare_parameter(
+            "pool_origin_position", [0.87, 1.07, 0.2],
+            descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_DOUBLE_ARRAY)
         )
 
-        # get parameter
         world_frame = str(self.get_parameter("world_frame").value)
         pool_frame = str(self.get_parameter("pool_frame").value)
         pool_stl_file_name = str(self.get_parameter("pool_stl_file_name").value)
         timer_period = float(self.get_parameter("dt").value)
+        pool_origin_position = self.get_parameter("pool_origin_position").value
 
-        # center of the top surface of the pool(=origin of the pool model) in world coordinate(origin within motive)
-        pool_origin_position_in_world = Vector3(**dict(zip(["x", "y", "z"], [0.87, 1.07, 0.2])))
+        # pool origin: center of the top surface in world frame (Motive origin)
+        pool_origin_position_in_world = Vector3(
+            x=pool_origin_position[0], y=pool_origin_position[1], z=pool_origin_position[2]
+        )
 
         world_to_pool_origin = TransformStamped(
             header=Header(stamp=self.get_clock().now().to_msg(), frame_id=world_frame),
@@ -57,7 +62,7 @@ class PoolVisualizer(Node):
         pool_stl_file_path = os.path.join(pkg_pool_description, "meshes", pool_stl_file_name)
         assert os.path.exists(pool_stl_file_path)
 
-        self.pool_makrer = Marker(
+        self.pool_marker = Marker(
             header=Header(stamp=self.get_clock().now().to_msg(), frame_id=pool_frame),
             ns="pool",
             id=0,
@@ -77,19 +82,19 @@ class PoolVisualizer(Node):
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
     def timer_callback(self) -> None:
-        self.pool_marker_pub.publish(self.pool_makrer)
+        self.pool_marker_pub.publish(self.pool_marker)
 
 
 def main() -> None:
     rclpy.init()
-    pool_visualizer = PoolVisualizer()
+    node = PoolVisualizer()
 
     try:
-        rclpy.spin(pool_visualizer)
-    except:
-        pool_visualizer.get_logger().error(traceback.format_exc())
+        rclpy.spin(node)
+    except Exception:
+        node.get_logger().error("Unexpected error", exc_info=True)
     finally:
-        pool_visualizer.destroy_node()
+        node.destroy_node()
         rclpy.shutdown()
 
 

@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import traceback
-
 import matplotlib.pyplot as plt
 import numpy as np
 import rclpy
@@ -13,6 +11,9 @@ from std_msgs.msg import Float32MultiArray, Header
 
 from .coverage_utils.field_generator import FieldGenerator
 from .coverage_utils.utils import multiarray_to_ndarray
+
+POINTCLOUD_FIELD_NAMES = ["x", "y", "z", "r", "g", "b"]
+BYTES_PER_FIELD = 4  # float32
 
 
 class PhiPointCloudVisualizer(Node):
@@ -30,7 +31,6 @@ class PhiPointCloudVisualizer(Node):
     def __init__(self) -> None:
         super().__init__("phi_pointcloud_visualizer")
 
-        # declare parameter
         self.declare_parameter(
             "world_frame", "world", descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_STRING)
         )
@@ -44,7 +44,6 @@ class PhiPointCloudVisualizer(Node):
             "y_limit", [-1.0, 1.0], descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_DOUBLE_ARRAY)
         )
 
-        # get parameter
         world_frame = str(self.get_parameter("world_frame").value)
         grid_accuracy = np.array(self.get_parameter("grid_accuracy").value)
         self.dim = len(self.get_parameter("grid_accuracy").value)
@@ -59,7 +58,6 @@ class PhiPointCloudVisualizer(Node):
         grid_map = field_generator.generate_grid_map()
         self.rows: NDArray = np.array(grid_map).reshape([self.dim, -1]).T
 
-        # Create pointcloud for visualizing importance indices
         self.phi_pointcloud = PointCloud2(
             header=Header(
                 stamp=self.get_clock().now().to_msg(),
@@ -67,15 +65,11 @@ class PhiPointCloudVisualizer(Node):
             ),
             height=1,
             fields=[
-                PointField(name="x", offset=0, datatype=PointField.FLOAT32, count=1),
-                PointField(name="y", offset=4, datatype=PointField.FLOAT32, count=1),
-                PointField(name="z", offset=8, datatype=PointField.FLOAT32, count=1),
-                PointField(name="r", offset=12, datatype=PointField.FLOAT32, count=1),
-                PointField(name="g", offset=16, datatype=PointField.FLOAT32, count=1),
-                PointField(name="b", offset=20, datatype=PointField.FLOAT32, count=1),
+                PointField(name=name, offset=i * BYTES_PER_FIELD, datatype=PointField.FLOAT32, count=1)
+                for i, name in enumerate(POINTCLOUD_FIELD_NAMES)
             ],
             is_bigendian=False,
-            point_step=24,
+            point_step=len(POINTCLOUD_FIELD_NAMES) * BYTES_PER_FIELD,
             is_dense=True,
         )
 
@@ -102,10 +96,10 @@ class PhiPointCloudVisualizer(Node):
         """
         phi = multiarray_to_ndarray(float, np.float32, msg).reshape([-1, 1])
 
-        # Adjust dimensions and use matplotlib's color_map to represent importance by color
+        # map importance values to RGB via colormap
         rgba_phi: NDArray = plt.get_cmap("jet")(phi).squeeze()
 
-        # If the dimension is less than or equal to 2, fill the missing coordinates with 0
+        # pad missing coordinates with 0 for dim <= 2
         points = np.hstack(
             [
                 self.rows,
@@ -123,14 +117,14 @@ class PhiPointCloudVisualizer(Node):
 
 def main() -> None:
     rclpy.init()
-    phi_pointcloud_visualizer = PhiPointCloudVisualizer()
+    node = PhiPointCloudVisualizer()
 
     try:
-        rclpy.spin(phi_pointcloud_visualizer)
-    except:
-        phi_pointcloud_visualizer.get_logger().error(traceback.format_exc())
+        rclpy.spin(node)
+    except Exception:
+        node.get_logger().error("Unexpected error", exc_info=True)
     finally:
-        phi_pointcloud_visualizer.destroy_node()
+        node.destroy_node()
         rclpy.shutdown()
 
 

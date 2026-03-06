@@ -1,15 +1,16 @@
 /**:
   ros__parameters:
     # parameters that do not need to be changed
-    world_frame: "world" 
+    world_frame: "world"
     pool_frame: "pool_origin"
     agent_frame: "base"
     agent_prefix: "agent"
     x_limit: [-1.5, 3.0] # 4.5m
     y_limit: [0.2, 1.9] # 1.7m
     pool_stl_file_name: "field.stl"
-    
-    # pose updating rate 
+    pool_origin_position: [0.87, 1.07, 0.2]
+
+    # pose updating rate
     dt: 0.1 # [s]
 
     # field parameters
