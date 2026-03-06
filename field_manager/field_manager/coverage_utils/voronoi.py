@@ -41,20 +41,17 @@ class Voronoi:
 
         Args:
             agent_position (NDArray): Voronoi region generator point
-            neighbor_agent_position_list (List[NDArray]): Neighbor generator points. It is sufficient enough to include all neighbors,
-                                                          and including other generator points not to cause any issues in the calculation.
+            neighbor_agent_position_list (List[NDArray]): Neighbor generator points.
             phi (NDArray): Importance map
             grid_map (List[NDArray]): Positions of discrete points. [x_grid_map, y_grid_map, ...]
-            point_density (float): Discrete point density. Corresponds to the area/volume assigned to each discrete point.
+            point_density (float): Discrete point density.
 
         Returns:
             Tuple[NDArray, List[NDArray], NDArray]:
-            Voronoi centroid, a collection of discrete points coordinates indicating the Voronoi region (combined with grid_map to form elements for each axis), and a map indicating whether points are inside or outside the Voronoi region (1/0).
+            Voronoi centroid, sensing region grid points, and sensing region mask.
         """
-
         dim = len(grid_map)
 
-        # Initialize Voronoi region
         voronoi_region: NDArray = np.ones_like(grid_map[0], dtype=np.bool_)
 
         assert self.p >= 1 and self.radius > 0
@@ -62,19 +59,15 @@ class Voronoi:
         fov_region = distance_from_agent < self.radius
 
         for neighbor_agent_position in neighbor_agent_position_list:
-            distance_from_neighbor_agent = sum(
+            distance_from_neighbor = sum(
                 [abs(grid_map[i] - neighbor_agent_position[i]) ** self.p for i in range(dim)]
             ) ** (1 / self.p)
 
-            # Extract points closer to self (agent_position) than to neighbor_agent_position
-            near_region = distance_from_neighbor_agent > distance_from_agent
-            # Extract discrete points for which self is the closest agent
+            near_region = distance_from_neighbor > distance_from_agent
             voronoi_region *= near_region
 
-        # Intersection of Voronoi region and field of view
         sensing_region = voronoi_region * fov_region
 
-        # Calculate centroid position of sensing region
         centroid_position = self.calc_centroid_position(grid_map, phi, sensing_region, point_density, dim)
         sensing_region_grid_points = [grid_map[i][sensing_region] for i in range(dim)]
         return centroid_position, sensing_region_grid_points, sensing_region

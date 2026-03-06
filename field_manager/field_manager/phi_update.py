@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 
-import traceback
 from dataclasses import dataclass
-from enum import IntEnum
 from functools import partial
+from typing import List
 
 import numpy as np
 import rclpy
-
 from geometry_msgs.msg import Pose, PoseArray
 from numpy.typing import NDArray
 from rcl_interfaces.msg import ParameterDescriptor, ParameterType
@@ -15,8 +13,8 @@ from rclpy.node import Node
 from std_msgs.msg import Float32, Float32MultiArray, Int8MultiArray
 
 from .coverage_utils.field_generator import FieldGenerator
-from .coverage_utils.utils import ndarray_to_multiarray, multiarray_to_ndarray 
 from .coverage_utils.sensing_performance import SensingPerformance
+from .coverage_utils.utils import multiarray_to_ndarray, ndarray_to_multiarray
 
 
 @dataclass
@@ -26,13 +24,13 @@ class Data:
     sensing_region: NDArray
     is_ready: bool = False
 
+
 class PhiUpdate(Node):
     """Centralized controller to manage importance distribution"""
 
     def __init__(self) -> None:
         super().__init__("phi_update")
 
-        # declare parameter
         self.declare_parameter(
             "grid_accuracy", descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_INTEGER_ARRAY)
         )
@@ -59,17 +57,13 @@ class PhiUpdate(Node):
             "dt", 0.1, descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_DOUBLE)
         )
 
-        # get parameter
         grid_accuracy = np.array(self.get_parameter("grid_accuracy").value)
-        self.dim = len(self.get_parameter("grid_accuracy").value)
         limit = np.array(
             [
                 self.get_parameter("x_limit").value,
                 self.get_parameter("y_limit").value,
             ]
         )
-        center = np.sum(limit, axis=1) / 2.0
-        width = np.diff(limit, axis=1)
 
         field_generator = FieldGenerator(grid_accuracy=grid_accuracy, limit=limit)
         self.grid_map = field_generator.generate_grid_map()
@@ -83,8 +77,10 @@ class PhiUpdate(Node):
         self.delta_increase = float(self.get_parameter("delta_increase").value)
         self.delta_decrease = float(self.get_parameter("delta_decrease").value)
         self.sensing_radius = float(self.get_parameter("sensing_radius").value)
-        self.curr_pose_list = [Pose()] * agent_num
-        self.data_list = [Data(sensing_region=np.zeros_like(self.grid_map[0], np.bool_))] * agent_num
+        self.curr_pose_list: List[Pose] = [Pose() for _ in range(agent_num)]
+        self.data_list: List[Data] = [
+            Data(sensing_region=np.zeros_like(self.grid_map[0], np.bool_)) for _ in range(agent_num)
+        ]
         self.pose_array_is_ready = False
         self.central_is_ready = False
 
@@ -122,14 +118,12 @@ class PhiUpdate(Node):
             for agent_id, agent_position in enumerate(all_agent_position_list):
                 self.phi = self.update_phi(agent_position, self.phi, self.data_list[agent_id].sensing_region)
         else:
-            if (
-                len([data.is_ready for data in self.data_list if not data.is_ready]) == 0
-            ) and self.pose_array_is_ready:
-                self.get_logger().warn("phi_update is ready")
+            if all(data.is_ready for data in self.data_list) and self.pose_array_is_ready:
+                self.get_logger().info("phi_update is ready")
                 self.central_is_ready = True
 
         self.phi_pub.publish(ndarray_to_multiarray(Float32MultiArray, self.phi))
-        self.sum_phi_pub.publish(Float32(data=np.sum(self.phi)))
+        self.sum_phi_pub.publish(Float32(data=float(np.sum(self.phi))))
 
     def update_phi(self, agent_position: NDArray, phi: NDArray, region: NDArray) -> NDArray:
         grid_points = np.hstack([self.grid_map[i].reshape(-1, 1) for i in range(len(self.grid_map))])
@@ -158,8 +152,8 @@ def main() -> None:
 
     try:
         rclpy.spin(phi_update)
-    except:
-        phi_update.get_logger().error(traceback.format_exc())
+    except Exception:
+        phi_update.get_logger().error("Unexpected error", exc_info=True)
     finally:
         phi_update.destroy_node()
         rclpy.shutdown()

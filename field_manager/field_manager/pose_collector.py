@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-import traceback
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import partial
 from typing import List
 
@@ -14,7 +13,7 @@ from std_msgs.msg import Header
 
 @dataclass
 class Data:
-    curr_pose: Pose = Pose()
+    curr_pose: Pose = field(default_factory=Pose)
     is_ready: bool = False
 
 
@@ -24,7 +23,6 @@ class PoseCollector(Node):
     def __init__(self) -> None:
         super().__init__("pose_collector")
 
-        # declare parameter
         self.declare_parameter(
             "world_frame", "world", descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_STRING)
         )
@@ -40,7 +38,7 @@ class PoseCollector(Node):
         agent_num = int(self.get_parameter("agent_num").value)
         agent_prefix = str(self.get_parameter("agent_prefix").value)
 
-        self.data_list: List[Data] = [Data()] * agent_num
+        self.data_list: List[Data] = [Data() for _ in range(agent_num)]
         self.is_ready = False
 
         timer_period = float(self.get_parameter("timer_period").value)
@@ -48,8 +46,7 @@ class PoseCollector(Node):
         # pub
         self.curr_pose_array_pub = self.create_publisher(PoseArray, "curr_pose_array", 10)
 
-        # sub
-        # Set subscription and callback functions depending on agent number and namespace
+        # sub: create per-agent subscriptions
         for agent_id in range(agent_num):
             agent_name = agent_prefix + str(agent_id)
             topic_name = agent_name + "/curr_pose"
@@ -63,9 +60,8 @@ class PoseCollector(Node):
         self.data_list[agent_id] = Data(curr_pose=msg, is_ready=True)
 
     def timer_callback(self) -> None:
-        # Unpublish unless all agents' poses are collected (is_ready==True)
         if self.is_ready:
-            # Store current poses in the order of agent_id
+            # publish poses ordered by agent_id
             curr_pose_array = [data.curr_pose for data in self.data_list]
             self.curr_pose_array_pub.publish(
                 PoseArray(
@@ -74,8 +70,8 @@ class PoseCollector(Node):
                 )
             )
         else:
-            if len([data.is_ready for data in self.data_list if not data.is_ready]) == 0:
-                self.get_logger().warn("pose_collector is ready")
+            if all(data.is_ready for data in self.data_list):
+                self.get_logger().info("pose_collector is ready")
                 self.is_ready = True
 
 
@@ -85,8 +81,8 @@ def main() -> None:
 
     try:
         rclpy.spin(pose_collector)
-    except:
-        pose_collector.get_logger().error(traceback.format_exc())
+    except Exception:
+        pose_collector.get_logger().error("Unexpected error", exc_info=True)
     finally:
         pose_collector.destroy_node()
         rclpy.shutdown()

@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import traceback
-
 import numpy as np
 import rclpy
 from geometry_msgs.msg import Point, Vector3
@@ -20,7 +18,6 @@ class SensingRegionMarkerVisualizer(Node):
     def __init__(self) -> None:
         super().__init__("sensing_region_marker_visualizer")
 
-        # declare parameter
         self.declare_parameter(
             "world_frame", "world", descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_STRING)
         )
@@ -35,7 +32,6 @@ class SensingRegionMarkerVisualizer(Node):
             "y_limit", [-1.0, 1.0], descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_DOUBLE_ARRAY)
         )
 
-        # get parameter
         world_frame = str(self.get_parameter("world_frame").value)
         self.agent_id = int(self.get_parameter("agent_id").value)
 
@@ -53,7 +49,6 @@ class SensingRegionMarkerVisualizer(Node):
         # Select appropriate transparency according to dimension
         self.alpha = 0.7 - 0.15 * self.dim
 
-        # Create Marker for sensing region visualization
         self.sensing_region_marker = Marker(
             header=Header(
                 stamp=self.get_clock().now().to_msg(),
@@ -100,7 +95,7 @@ class SensingRegionMarkerVisualizer(Node):
         )
 
         self.sensing_region_marker.header.stamp = self.get_clock().now().to_msg()
-        # If the dimension is less than or equal to 2, fill the missing coordinates with 0
+        # pad missing coordinates with 0 for dim <= 2
         self.sensing_region_marker.points = [
             Point(**dict(zip(["x", "y", "z"], point)))
             for point in [padding(point) for point in sensing_region_grid_points]
@@ -114,14 +109,14 @@ class SensingRegionMarkerVisualizer(Node):
 
 def main() -> None:
     rclpy.init()
-    sensing_region_marker_visualizer = SensingRegionMarkerVisualizer()
+    node = SensingRegionMarkerVisualizer()
 
     try:
-        rclpy.spin(sensing_region_marker_visualizer)
-    except:
-        sensing_region_marker_visualizer.get_logger().error(traceback.format_exc())
+        rclpy.spin(node)
+    except Exception:
+        node.get_logger().error("Unexpected error", exc_info=True)
     finally:
-        sensing_region_marker_visualizer.destroy_node()
+        node.destroy_node()
         rclpy.shutdown()
 
 
